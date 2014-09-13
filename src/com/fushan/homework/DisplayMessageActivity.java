@@ -246,7 +246,7 @@ public class DisplayMessageActivity extends Activity {
 				mPager.setCurrentItem(1, false);
 			}
 			SetCurrentDate();
-			ShowMessage("正在读取网络数据...");
+//			ShowMessage("正在读取网络数据...");
 			LastTask.cancel(true);
 			LastTask = new GetToDateHomeWorkTask().execute();
 		}
@@ -267,7 +267,7 @@ public class DisplayMessageActivity extends Activity {
 				LastTask = new LoginTask().execute();
 				return;
 			}
-			ShowMessage("正在读取数据...");
+//			ShowMessage("正在读取数据...");
 			LastTask.cancel(true);
 			LastTask = new GetToDateHomeWorkTask().execute();
 		}
@@ -279,7 +279,7 @@ public class DisplayMessageActivity extends Activity {
 				return;
 			c.add(Calendar.DATE, -1);
 			SetCurrentDate();
-			ShowMessage("正在读取数据...");
+//			ShowMessage("正在读取数据...");
 			LastTask.cancel(true);
 			LastTask = new GetToDateHomeWorkTask().execute();
 		}
@@ -291,7 +291,7 @@ public class DisplayMessageActivity extends Activity {
 				return;
 			c.add(Calendar.DATE, 1);
 			SetCurrentDate();
-			ShowMessage("正在读取数据...");
+//			ShowMessage("正在读取数据...");
 			LastTask.cancel(true);
 			LastTask = new GetToDateHomeWorkTask().execute();
 		}
