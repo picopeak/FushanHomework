@@ -92,7 +92,10 @@ public class DisplayMessageActivity extends Activity {
 
 	// The date to display homework
 	private Calendar c;
-
+	private String date;
+	
+	private HomeworkDatabase HWDB;
+	
 	private boolean login;
 	// private String ViewState =
 	// "dDwtMTIwMjU0ODg5NDs7bDxsb2dpbjpidG5sb2dpbjs+PirAF7I2CPvB/hrCXAPxCiCha+tS";
@@ -117,7 +120,7 @@ public class DisplayMessageActivity extends Activity {
 	}
 
 	private void SetCurrentDate() {
-		String time = c.get(Calendar.YEAR) + "-"
+		date = c.get(Calendar.YEAR) + "-"
 				+ formatTime(c.get(Calendar.MONTH) + 1) + "-"
 				+ formatTime(c.get(Calendar.DAY_OF_MONTH));
 		String w = "";
@@ -144,9 +147,9 @@ public class DisplayMessageActivity extends Activity {
 			w = "六";
 			break;
 		}
-		time = time + "(" + w + ")";
+		date = date + "(" + w + ")";
 		TextView CurrentDate = (TextView) findViewById(R.id.CurrentDate);
-		CurrentDate.setText(time);
+		CurrentDate.setText(date);
 		CurrentDate.setTextColor(Color.WHITE);
 		CurrentDate.setBackgroundColor(Color.parseColor("#9D61AB"));
 	}
@@ -264,7 +267,7 @@ public class DisplayMessageActivity extends Activity {
 				LastTask = new LoginTask().execute();
 				return;
 			}
-			ShowMessage("正在读取网络数据...");
+			ShowMessage("正在读取数据...");
 			LastTask.cancel(true);
 			LastTask = new GetToDateHomeWorkTask().execute();
 		}
@@ -276,7 +279,7 @@ public class DisplayMessageActivity extends Activity {
 				return;
 			c.add(Calendar.DATE, -1);
 			SetCurrentDate();
-			ShowMessage("正在读取网络数据...");
+			ShowMessage("正在读取数据...");
 			LastTask.cancel(true);
 			LastTask = new GetToDateHomeWorkTask().execute();
 		}
@@ -288,7 +291,7 @@ public class DisplayMessageActivity extends Activity {
 				return;
 			c.add(Calendar.DATE, 1);
 			SetCurrentDate();
-			ShowMessage("正在读取网络数据...");
+			ShowMessage("正在读取数据...");
 			LastTask.cancel(true);
 			LastTask = new GetToDateHomeWorkTask().execute();
 		}
@@ -750,6 +753,13 @@ public class DisplayMessageActivity extends Activity {
 
 		protected Long doInBackground(URL... urls) {
 			try {
+				// Fetch from database first
+				String[] HW = HWDB.getRecords(UserName, date);
+				if (HW[0] != null) {
+					DisplayHomeWork(HW);
+				}
+				
+				// Fetch from network
 				HW = GetTodayHomeWork();
 			} catch (Exception pce) {
 				// Log.e("DisplayMessageActivity", "PCE " + pce.getMessage());
@@ -783,6 +793,7 @@ public class DisplayMessageActivity extends Activity {
 		}
 	}
 
+	// This method is to parse home work html string
 	private String[] GetHomeWork(Document doc) {
 		String[] HomeWork = new String[10];
 
@@ -861,6 +872,14 @@ public class DisplayMessageActivity extends Activity {
 	}
 
 	private String[] GetToDateHomeWork() throws ParseException {
+		// If we already have homework for this date, return it directly.
+		String[] HW = HWDB.getRecords(UserName, date);
+		if (HW[0] != null) {
+			return HW;
+		}
+		
+		// Read from network...
+		
 		// Covert Date. The day after 2000/1/1, e.g. 2013/12/29 is 5111
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 		Date beginDate = format.parse("2000-01-01");
@@ -909,6 +928,9 @@ public class DisplayMessageActivity extends Activity {
 				if (SC == 200) {
 					HomeWork = ReadHomeWork(httpResponse);
 					httppost.abort();
+					
+					// Write into database
+					HWDB.createRecords(UserName, date, HomeWork);
 					return HomeWork;
 				} else {
 					httppost.abort();
@@ -941,6 +963,10 @@ public class DisplayMessageActivity extends Activity {
 				if (SC == 200) {
 					HomeWork = ReadHomeWork(httpResponse);
 					get.abort();
+					
+					// Write into database
+					HWDB.createRecords(UserName, date, HomeWork);
+
 					return HomeWork;
 				} else {
 					get.abort();
@@ -1020,6 +1046,9 @@ public class DisplayMessageActivity extends Activity {
 		imageMap = new HashMap<String, Drawable>();
 		dm = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(dm);
+
+		HWDB = new HomeworkDatabase(DisplayMessageActivity.this);
+		HWDB.open();
 
 		// Display homework using page viewer
 		InitViewPager();
