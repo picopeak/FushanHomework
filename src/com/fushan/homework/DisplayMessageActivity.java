@@ -220,6 +220,8 @@ public class DisplayMessageActivity extends Activity {
 
 			if (arg1 == 1) {
 				ShowMessage("正在登录网络...");
+				if (LastTask != null)
+					LastTask.cancel(true);
 				LastTask = new LoginTask().execute();
 			}
 
@@ -255,14 +257,17 @@ public class DisplayMessageActivity extends Activity {
 			if (arg0 == 0) {
 				c.add(Calendar.DATE, -1);
 				mPager.setCurrentItem(1, false);
-				ShowMessage("正在读取数据...");
+				ShowMessage("正在读取网络数据...");
 			} else if (arg0 == 2) {
 				c.add(Calendar.DATE, 1);
 				mPager.setCurrentItem(1, false);
-				ShowMessage("正在读取数据...");
-			}
+				ShowMessage("正在读取网络数据...");
+			}/* else {
+				return;
+			}*/
 			SetCurrentDate();
-			LastTask.cancel(true);
+			if (LastTask != null)
+				LastTask.cancel(true);
 			if (isToday(c))
 				LastTask = new GetToDateHomeWorkTask2().execute();
 			else
@@ -280,7 +285,9 @@ public class DisplayMessageActivity extends Activity {
 
 	class CurrentDate_OnClickListener implements OnClickListener {
 		public void onClick(View v) {
-			LastTask.cancel(true);
+			if (LastTask != null)
+				LastTask.cancel(true);
+			ShowMessage("正在读取网络数据...");
 			LastTask = new LoginGetToDateTask3().execute();
 		}
 	}
@@ -291,8 +298,9 @@ public class DisplayMessageActivity extends Activity {
 				return;
 			c.add(Calendar.DATE, -1);
 			SetCurrentDate();
-			ShowMessage("正在读取数据...");
-			LastTask.cancel(true);
+			ShowMessage("正在读取网络数据...");
+			if (LastTask != null)
+				LastTask.cancel(true);
 			if (isToday(c))
 				LastTask = new GetToDateHomeWorkTask2().execute();
 			else
@@ -306,8 +314,9 @@ public class DisplayMessageActivity extends Activity {
 				return;
 			c.add(Calendar.DATE, 1);
 			SetCurrentDate();
-			ShowMessage("正在读取数据...");
-			LastTask.cancel(true);
+			ShowMessage("正在读取网络数据...");
+			if (LastTask != null)
+				LastTask.cancel(true);
 			if (isToday(c))
 				LastTask = new GetToDateHomeWorkTask2().execute();
 			else
@@ -493,7 +502,8 @@ public class DisplayMessageActivity extends Activity {
 				PassWord = preference.getString("PassWord" + CurrentUser, "");
 
 				ShowMessage("登录成功！正在读取网络数据...");
-				LastTask.cancel(true);
+				if (LastTask != null)
+					LastTask.cancel(true);
 				LastTask = new GetTodayHomeWorkTask().execute();
 			}
 		}
@@ -532,7 +542,8 @@ public class DisplayMessageActivity extends Activity {
 				PassWord = preference.getString("PassWord" + CurrentUser, "");
 
 				ShowMessage("正在读取网络数据...");
-				LastTask.cancel(true);
+				if (LastTask != null)
+					LastTask.cancel(true);
 				LastTask = new GetToDateHomeWorkTask3().execute();
 			}
 		}
@@ -1215,8 +1226,9 @@ public class DisplayMessageActivity extends Activity {
 			PassWord = preference.getString("PassWord" + 1, "");
 
 			ShowMessage("正在登录网络...");
-			LastTask.cancel(true);
-			new LoginTask().execute();
+			if (LastTask != null)
+				LastTask.cancel(true);
+			LastTask = new LoginTask().execute();
 			return true;
 		}
 		case R.id.User2: {
@@ -1231,8 +1243,9 @@ public class DisplayMessageActivity extends Activity {
 			PassWord = preference.getString("PassWord" + 2, "");
 
 			ShowMessage("正在登录网络...");
-			LastTask.cancel(true);
-			new LoginTask().execute();
+			if (LastTask != null)
+				LastTask.cancel(true);
+			LastTask = new LoginTask().execute();
 			return true;
 		}
 		case R.id.Fontsize: {
@@ -1294,8 +1307,9 @@ public class DisplayMessageActivity extends Activity {
 
 			// Try new login
 			ShowMessage("正在登录网络...");
-			LastTask.cancel(true);
-			new LoginTask().execute();
+			if (LastTask != null)
+				LastTask.cancel(true);
+			LastTask = new LoginTask().execute();
 			break;
 		case RESULT_CANCELED:
 			break;
