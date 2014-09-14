@@ -118,9 +118,9 @@ public class DisplayMessageActivity extends Activity {
 	private String formatTime(int t) {
 		return t >= 10 ? "" + t : "0" + t;
 	}
-
-	private void SetCurrentDate() {
-		date = c.get(Calendar.YEAR) + "-"
+	
+	private String getDate(Calendar c) {
+		String date = c.get(Calendar.YEAR) + "-"
 				+ formatTime(c.get(Calendar.MONTH) + 1) + "-"
 				+ formatTime(c.get(Calendar.DAY_OF_MONTH));
 		String w = "";
@@ -148,6 +148,20 @@ public class DisplayMessageActivity extends Activity {
 			break;
 		}
 		date = date + "(" + w + ")";
+		
+		return date;
+	}
+
+	private boolean isToday(Calendar date) {
+		Calendar today = Calendar.getInstance();
+		if (getDate(date).equals(getDate(today)))
+			return true;
+		else
+			return false;
+	}
+
+	private void SetCurrentDate() {
+		date = getDate(c);
 		TextView CurrentDate = (TextView) findViewById(R.id.CurrentDate);
 		CurrentDate.setText(date);
 		CurrentDate.setTextColor(Color.WHITE);
@@ -241,14 +255,18 @@ public class DisplayMessageActivity extends Activity {
 			if (arg0 == 0) {
 				c.add(Calendar.DATE, -1);
 				mPager.setCurrentItem(1, false);
+				ShowMessage("正在读取数据...");
 			} else if (arg0 == 2) {
 				c.add(Calendar.DATE, 1);
 				mPager.setCurrentItem(1, false);
+				ShowMessage("正在读取数据...");
 			}
 			SetCurrentDate();
-//			ShowMessage("正在读取网络数据...");
 			LastTask.cancel(true);
-			LastTask = new GetToDateHomeWorkTask().execute();
+			if (isToday(c))
+				LastTask = new GetToDateHomeWorkTask2().execute();
+			else
+				LastTask = new GetToDateHomeWorkTask1().execute();
 		}
 
 		@Override
@@ -262,14 +280,8 @@ public class DisplayMessageActivity extends Activity {
 
 	class CurrentDate_OnClickListener implements OnClickListener {
 		public void onClick(View v) {
-			if (!login) {
-				ShowMessage("正在登录网络...");
-				LastTask = new LoginTask().execute();
-				return;
-			}
-//			ShowMessage("正在读取数据...");
 			LastTask.cancel(true);
-			LastTask = new GetToDateHomeWorkTask().execute();
+			LastTask = new LoginGetToDateTask3().execute();
 		}
 	}
 
@@ -279,9 +291,12 @@ public class DisplayMessageActivity extends Activity {
 				return;
 			c.add(Calendar.DATE, -1);
 			SetCurrentDate();
-//			ShowMessage("正在读取数据...");
+			ShowMessage("正在读取数据...");
 			LastTask.cancel(true);
-			LastTask = new GetToDateHomeWorkTask().execute();
+			if (isToday(c))
+				LastTask = new GetToDateHomeWorkTask2().execute();
+			else
+				LastTask = new GetToDateHomeWorkTask1().execute();
 		}
 	}
 
@@ -291,9 +306,12 @@ public class DisplayMessageActivity extends Activity {
 				return;
 			c.add(Calendar.DATE, 1);
 			SetCurrentDate();
-//			ShowMessage("正在读取数据...");
+			ShowMessage("正在读取数据...");
 			LastTask.cancel(true);
-			LastTask = new GetToDateHomeWorkTask().execute();
+			if (isToday(c))
+				LastTask = new GetToDateHomeWorkTask2().execute();
+			else
+				LastTask = new GetToDateHomeWorkTask1().execute();
 		}
 	}
 
@@ -481,6 +499,45 @@ public class DisplayMessageActivity extends Activity {
 		}
 	}
 
+	// Login facility
+	private class LoginGetToDateTask3 extends AsyncTask<URL, Integer, Long> {
+		protected Long doInBackground(URL... urls) {
+			try {
+				login = Login();
+			} catch (Exception pce) {
+				// Log.e("DisplayMessageActivity", "PCE " + pce.getMessage());
+			}
+			return (long) 1;
+		}
+
+		protected void onPostExecute(Long result) {
+			if (!login) {
+				Intent intent = new Intent();
+				intent.setClass(DisplayMessageActivity.this, MainActivity.class);
+				intent.putExtra("CurrentUser", CurrentUser);
+				startActivityForResult(intent, 0);
+			} else {
+				// create calendar
+				// c = Calendar.getInstance();
+				SetCurrentDate();
+
+				// After login successfully, we update CurrentUser, UserName and
+				// PassWord
+				SharedPreferences preference = getSharedPreferences("person",
+						Context.MODE_PRIVATE);
+				Editor edit = preference.edit();
+				edit.putInt("CurrentUser", CurrentUser);
+				edit.commit();
+				UserName = preference.getString("UserName" + CurrentUser, "");
+				PassWord = preference.getString("PassWord" + CurrentUser, "");
+
+				ShowMessage("正在读取网络数据...");
+				LastTask.cancel(true);
+				LastTask = new GetToDateHomeWorkTask3().execute();
+			}
+		}
+	}
+
 	// ////////////////////////////////////////////////////////
 	// The following is to display home work
 	// ////////////////////////////////////////////////////////
@@ -547,6 +604,7 @@ public class DisplayMessageActivity extends Activity {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	public class URLDrawable extends BitmapDrawable {
 		// the drawable that you need to set, you could set the initial drawing
 		// with the loading image if you need to
@@ -759,8 +817,7 @@ public class DisplayMessageActivity extends Activity {
 					DisplayHomeWork(HW);
 				}
 				
-				// Fetch from network
-				HW = GetTodayHomeWork();
+				HW = GetTodayHomeWork1();
 			} catch (Exception pce) {
 				// Log.e("DisplayMessageActivity", "PCE " + pce.getMessage());
 			}
@@ -772,13 +829,73 @@ public class DisplayMessageActivity extends Activity {
 		}
 	}
 
-	private class GetToDateHomeWorkTask extends AsyncTask<URL, Integer, Long> {
+	private class GetToDateHomeWorkTask1 extends AsyncTask<URL, Integer, Long> {
 		private String[] HW = new String[10];
 
 		protected Long doInBackground(URL... urls) {
 			try {
 				if (isCancelled())
 					return (long) 1;
+
+				// Fetch from database first
+				HW = HWDB.getRecords(UserName, date);
+				
+				// Read from network only if homework is empty
+				if (HW[0] == null)
+					HW = GetToDateHomeWork();
+			} catch (Exception pce) {
+				// Log.e("DisplayMessageActivity", "PCE " + pce.getMessage());
+			}
+			return (long) 1;
+		}
+
+		protected void onPostExecute(Long result) {
+			if (isCancelled())
+				return;
+			DisplayHomeWork(HW);
+		}
+	}
+
+	private class GetToDateHomeWorkTask2 extends AsyncTask<URL, Integer, Long> {
+		private String[] HW = new String[10];
+
+		protected Long doInBackground(URL... urls) {
+			try {
+				if (isCancelled())
+					return (long) 1;
+
+				// Fetch from database first
+				HW = HWDB.getRecords(UserName, date);
+
+				// Display homework first
+				if (HW[0] != null) {
+					DisplayHomeWork(HW);
+				}
+
+				// Always read from network
+				HW = GetToDateHomeWork();
+			} catch (Exception pce) {
+				// Log.e("DisplayMessageActivity", "PCE " + pce.getMessage());
+			}
+			return (long) 1;
+		}
+
+		protected void onPostExecute(Long result) {
+			if (isCancelled())
+				return;
+			DisplayHomeWork(HW);
+		}
+	}
+
+	private class GetToDateHomeWorkTask3 extends AsyncTask<URL, Integer, Long> {
+		private String[] HW = new String[10];
+
+		protected Long doInBackground(URL... urls) {
+			try {
+				if (isCancelled())
+					return (long) 1;
+
+				// Always read from network
 				HW = GetToDateHomeWork();
 			} catch (Exception pce) {
 				// Log.e("DisplayMessageActivity", "PCE " + pce.getMessage());
@@ -872,12 +989,6 @@ public class DisplayMessageActivity extends Activity {
 	}
 
 	private String[] GetToDateHomeWork() throws ParseException {
-		// If we already have homework for this date, return it directly.
-		String[] HW = HWDB.getRecords(UserName, date);
-		if (HW[0] != null) {
-			return HW;
-		}
-		
 		// Read from network...
 		
 		// Covert Date. The day after 2000/1/1, e.g. 2013/12/29 is 5111
@@ -929,8 +1040,13 @@ public class DisplayMessageActivity extends Activity {
 					HomeWork = ReadHomeWork(httpResponse);
 					httppost.abort();
 					
-					// Write into database
-					HWDB.createRecords(UserName, date, HomeWork);
+					if (!isToday(c)) {
+						// Write into database
+						if (HomeWork[0] != "今日没有作业") {
+							HWDB.createRecords(UserName, date, HomeWork);
+						}
+					}
+					
 					return HomeWork;
 				} else {
 					httppost.abort();
@@ -950,7 +1066,7 @@ public class DisplayMessageActivity extends Activity {
 		return HomeWork;
 	}
 
-	public String[] GetTodayHomeWork() {
+	public String[] GetTodayHomeWork1() {
 		String[] HomeWork = new String[10];
 
 		try {
@@ -965,7 +1081,9 @@ public class DisplayMessageActivity extends Activity {
 					get.abort();
 					
 					// Write into database
-					HWDB.createRecords(UserName, date, HomeWork);
+					if (HomeWork[0] != "今日没有作业") {
+						HWDB.createRecords(UserName, date, HomeWork);
+					}
 
 					return HomeWork;
 				} else {

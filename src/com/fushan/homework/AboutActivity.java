@@ -47,6 +47,9 @@ public class AboutActivity extends Activity {
         AboutString += "3. 点击日期左右两侧箭头可以切换日期。<BR>";
         AboutString += "4. 可以使用菜单快速切换两个用户。<BR><BR><BR>";
         AboutString += "<h3>福外作业更新介绍:</h3>";
+        AboutString += "v3.4:<BR><BR>";
+        AboutString += "1. 优化网络访问，大幅减少从福山教育网络的数据下载。<BR><BR>";
+        AboutString += "2. 修复点击日期刷新当前日期作业内容的bug。<BR><BR>";
         AboutString += "v3.3:<BR><BR>";
         AboutString += "1. 修复一个不能显示bitmap导致崩溃的bug。<BR><BR>";
         AboutString += "v3.2:<BR><BR>";
