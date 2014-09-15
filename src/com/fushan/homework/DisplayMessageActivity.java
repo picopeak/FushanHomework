@@ -257,11 +257,11 @@ public class DisplayMessageActivity extends Activity {
 			if (arg0 == 0) {
 				c.add(Calendar.DATE, -1);
 				mPager.setCurrentItem(1, false);
-				ShowMessage("正在读取网络数据...");
+				ShowMessage("正在读取数据...");
 			} else if (arg0 == 2) {
 				c.add(Calendar.DATE, 1);
 				mPager.setCurrentItem(1, false);
-				ShowMessage("正在读取网络数据...");
+				ShowMessage("正在读取数据...");
 			}/* else {
 				return;
 			}*/
@@ -287,7 +287,7 @@ public class DisplayMessageActivity extends Activity {
 		public void onClick(View v) {
 			if (LastTask != null)
 				LastTask.cancel(true);
-			ShowMessage("正在读取网络数据...");
+			ShowMessage("正在读取数据...");
 			LastTask = new LoginGetToDateTask3().execute();
 		}
 	}
@@ -298,7 +298,7 @@ public class DisplayMessageActivity extends Activity {
 				return;
 			c.add(Calendar.DATE, -1);
 			SetCurrentDate();
-			ShowMessage("正在读取网络数据...");
+			ShowMessage("正在读取数据...");
 			if (LastTask != null)
 				LastTask.cancel(true);
 			if (isToday(c))
@@ -314,7 +314,7 @@ public class DisplayMessageActivity extends Activity {
 				return;
 			c.add(Calendar.DATE, 1);
 			SetCurrentDate();
-			ShowMessage("正在读取网络数据...");
+			ShowMessage("正在读取数据...");
 			if (LastTask != null)
 				LastTask.cancel(true);
 			if (isToday(c))
@@ -501,7 +501,7 @@ public class DisplayMessageActivity extends Activity {
 				UserName = preference.getString("UserName" + CurrentUser, "");
 				PassWord = preference.getString("PassWord" + CurrentUser, "");
 
-				ShowMessage("登录成功！正在读取网络数据...");
+				ShowMessage("登录成功！正在读取数据...");
 				if (LastTask != null)
 					LastTask.cancel(true);
 				LastTask = new GetTodayHomeWorkTask().execute();
@@ -541,7 +541,7 @@ public class DisplayMessageActivity extends Activity {
 				UserName = preference.getString("UserName" + CurrentUser, "");
 				PassWord = preference.getString("PassWord" + CurrentUser, "");
 
-				ShowMessage("正在读取网络数据...");
+				ShowMessage("正在读取数据...");
 				if (LastTask != null)
 					LastTask.cancel(true);
 				LastTask = new GetToDateHomeWorkTask3().execute();
@@ -823,7 +823,7 @@ public class DisplayMessageActivity extends Activity {
 		protected Long doInBackground(URL... urls) {
 			try {
 				// Fetch from database first
-				String[] HW = HWDB.getRecords(UserName, date);
+				HW = HWDB.getRecords(UserName, date);
 				if (HW[0] != null) {
 					DisplayHomeWork(HW);
 				}
