@@ -88,7 +88,7 @@ public class DisplayMessageActivity extends Activity {
 	
 	// The ID of current user, can only be 1 or 2
 	private int CurrentUser = 1;
-	private AsyncTask<URL, Integer, Long> LastTask = null;
+	private AsyncTask<Calendar, Integer, Long> LastTask = null;
 
 	// The date to display homework
 	private Calendar c;
@@ -152,9 +152,9 @@ public class DisplayMessageActivity extends Activity {
 		return date;
 	}
 
-	private boolean isToday(Calendar date) {
+	private boolean isToday(Calendar c) {
 		Calendar today = Calendar.getInstance();
-		if (getDate(date).equals(getDate(today)))
+		if (getDate(c).equals(getDate(today)))
 			return true;
 		else
 			return false;
@@ -222,7 +222,7 @@ public class DisplayMessageActivity extends Activity {
 				ShowMessage("正在登录网络...");
 				if (LastTask != null)
 					LastTask.cancel(false);
-				LastTask = new LoginTask().execute();
+				LastTask = new LoginTask().execute(c);
 			}
 
 			return mListViews.get(arg1);
@@ -269,7 +269,7 @@ public class DisplayMessageActivity extends Activity {
 				LastTask.cancel(false);
 
 			SetCurrentDate();
-			GetToDateHomeWorkTaskWithCache();
+			GetToDateHomeWorkTaskWithCache(c);
 		}
 
 		@Override
@@ -286,7 +286,7 @@ public class DisplayMessageActivity extends Activity {
 			if (LastTask != null)
 				LastTask.cancel(false);
 			ShowMessage("正在读取数据...");
-			LastTask = new LoginGetToDateTask3().execute();
+			LastTask = new LoginGetToDateTask().execute(c);
 		}
 	}
 
@@ -300,7 +300,7 @@ public class DisplayMessageActivity extends Activity {
 			c.add(Calendar.DATE, -1);
 			SetCurrentDate();
 			ShowMessage("正在读取数据...");
-			GetToDateHomeWorkTaskWithCache();
+			GetToDateHomeWorkTaskWithCache(c);
 		}
 	}
 
@@ -314,7 +314,7 @@ public class DisplayMessageActivity extends Activity {
 			c.add(Calendar.DATE, 1);
 			SetCurrentDate();
 			ShowMessage("正在读取数据...");
-			GetToDateHomeWorkTaskWithCache();
+			GetToDateHomeWorkTaskWithCache(c);
 		}
 	}
 
@@ -464,9 +464,12 @@ public class DisplayMessageActivity extends Activity {
 	}
 
 	// Login facility
-	private class LoginTask extends AsyncTask<URL, Integer, Long> {
-		protected Long doInBackground(URL... urls) {
+	private class LoginTask extends AsyncTask<Calendar, Integer, Long> {
+		private Calendar c;
+		
+		protected Long doInBackground(Calendar... parms) {
 			try {
+				c = parms[0];
 				login = Login();
 			} catch (Exception pce) {
 				// Log.e("DisplayMessageActivity", "PCE " + pce.getMessage());
@@ -498,15 +501,18 @@ public class DisplayMessageActivity extends Activity {
 				ShowMessage("登录成功！正在读取数据...");
 				if (LastTask != null)
 					LastTask.cancel(false);
-				GetToDateHomeWorkTaskWithCache();
+				GetToDateHomeWorkTaskWithCache(c);
 			}
 		}
 	}
 
 	// Login facility
-	private class LoginGetToDateTask3 extends AsyncTask<URL, Integer, Long> {
-		protected Long doInBackground(URL... urls) {
+	private class LoginGetToDateTask extends AsyncTask<Calendar, Integer, Long> {
+		private Calendar c;
+		
+		protected Long doInBackground(Calendar... parms) {
 			try {
+				c = parms[0];
 				login = Login();
 			} catch (Exception pce) {
 				// Log.e("DisplayMessageActivity", "PCE " + pce.getMessage());
@@ -538,7 +544,7 @@ public class DisplayMessageActivity extends Activity {
 				ShowMessage("正在读取数据...");
 				if (LastTask != null)
 					LastTask.cancel(false);
-				LastTask = new GetToDateHomeWorkTask().execute();
+				LastTask = new GetToDateHomeWorkTask().execute(c);
 			}
 		}
 	}
@@ -811,15 +817,17 @@ public class DisplayMessageActivity extends Activity {
 	}
 
 	// Get homework data facility
-	private class GetTodayHomeWorkTask extends AsyncTask<URL, Integer, Long> {
+	private class GetTodayHomeWorkTask extends AsyncTask<Calendar, Integer, Long> {
 		private String[] HW = new String[10];
+		private Calendar c;
 
-		protected Long doInBackground(URL... urls) {
+		protected Long doInBackground(Calendar... parms) {
 			try {
 				if (isCancelled())
 					return (long) 1;
 
-				HW = GetTodayHomeWork();
+				c = parms[0];
+				HW = GetTodayHomeWork(c);
 			} catch (Exception pce) {
 				// Log.e("DisplayMessageActivity", "PCE " + pce.getMessage());
 			}
@@ -833,7 +841,7 @@ public class DisplayMessageActivity extends Activity {
 		}
 	}
 
-	private void GetToDateHomeWorkTaskWithCache() {
+	private void GetToDateHomeWorkTaskWithCache(Calendar c) {
 		String[] HW = new String[10];
 
 		// Cancel whatever task we have
@@ -841,25 +849,27 @@ public class DisplayMessageActivity extends Activity {
 			LastTask.cancel(false);
 
 		// Fetch from database first
-		HW = HWDB.getRecords(UserName, date);
+		HW = HWDB.getRecords(UserName, getDate(c));
 		if (HW[0] != null) {
 			DisplayHomeWork(HW);
 		}
 
 		if (isToday(c)) {
-			LastTask = new GetTodayHomeWorkTask().execute();
+			LastTask = new GetTodayHomeWorkTask().execute(c);
 		}
 	}
 
-	private class GetToDateHomeWorkTask extends AsyncTask<URL, Integer, Long> {
+	private class GetToDateHomeWorkTask extends AsyncTask<Calendar, Integer, Long> {
 		private String[] HW = new String[10];
+		private Calendar c;
 
-		protected Long doInBackground(URL... urls) {
+		protected Long doInBackground(Calendar... parms) {
 			try {
 				if (isCancelled())
 					return (long) 1;
 
-				HW = GetToDateHomeWork();
+				c = parms[0];
+				HW = GetToDateHomeWork(c);
 			} catch (Exception pce) {
 				// Log.e("DisplayMessageActivity", "PCE " + pce.getMessage());
 			}
@@ -951,7 +961,7 @@ public class DisplayMessageActivity extends Activity {
 		return HomeWork;
 	}
 
-	private String[] GetToDateHomeWork() throws ParseException {
+	private String[] GetToDateHomeWork(Calendar c) throws ParseException {
 		// Read from network...
 		
 		// Covert Date. The day after 2000/1/1, e.g. 2013/12/29 is 5111
@@ -1006,7 +1016,7 @@ public class DisplayMessageActivity extends Activity {
 					if (!isToday(c)) {
 						// Write into database
 						if (HomeWork[0] != "今日没有作业") {
-							HWDB.createRecords(UserName, date, HomeWork);
+							HWDB.createRecords(UserName, getDate(c), HomeWork);
 						}
 					}
 					
@@ -1029,7 +1039,7 @@ public class DisplayMessageActivity extends Activity {
 		return HomeWork;
 	}
 
-	public String[] GetTodayHomeWork() {
+	public String[] GetTodayHomeWork(Calendar c) {
 		String[] HomeWork = new String[10];
 
 		try {
@@ -1045,7 +1055,7 @@ public class DisplayMessageActivity extends Activity {
 					
 					// Write into database
 					if (HomeWork[0] != "今日没有作业") {
-						HWDB.createRecords(UserName, date, HomeWork);
+						HWDB.createRecords(UserName, getDate(c), HomeWork);
 					}
 
 					return HomeWork;
@@ -1180,7 +1190,7 @@ public class DisplayMessageActivity extends Activity {
 			ShowMessage("正在登录网络...");
 			if (LastTask != null)
 				LastTask.cancel(false);
-			LastTask = new LoginTask().execute();
+			LastTask = new LoginTask().execute(c);
 			return true;
 		}
 		case R.id.User2: {
@@ -1197,7 +1207,7 @@ public class DisplayMessageActivity extends Activity {
 			ShowMessage("正在登录网络...");
 			if (LastTask != null)
 				LastTask.cancel(false);
-			LastTask = new LoginTask().execute();
+			LastTask = new LoginTask().execute(c);
 			return true;
 		}
 		case R.id.Fontsize: {
@@ -1261,7 +1271,7 @@ public class DisplayMessageActivity extends Activity {
 			ShowMessage("正在登录网络...");
 			if (LastTask != null)
 				LastTask.cancel(false);
-			LastTask = new LoginTask().execute();
+			LastTask = new LoginTask().execute(c);
 			break;
 		case RESULT_CANCELED:
 			break;
