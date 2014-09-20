@@ -221,7 +221,7 @@ public class DisplayMessageActivity extends Activity {
 			if (arg1 == 1) {
 				ShowMessage("正在登录网络...");
 				if (LastTask != null)
-					LastTask.cancel(true);
+					LastTask.cancel(false);
 				LastTask = new LoginTask().execute();
 			}
 
@@ -265,13 +265,11 @@ public class DisplayMessageActivity extends Activity {
 			}/* else {
 				return;
 			}*/
-			SetCurrentDate();
 			if (LastTask != null)
-				LastTask.cancel(true);
-			if (isToday(c))
-				LastTask = new GetToDateHomeWorkTask2().execute();
-			else
-				LastTask = new GetToDateHomeWorkTask1().execute();
+				LastTask.cancel(false);
+
+			SetCurrentDate();
+			GetToDateHomeWorkTaskWithCache();
 		}
 
 		@Override
@@ -286,7 +284,7 @@ public class DisplayMessageActivity extends Activity {
 	class CurrentDate_OnClickListener implements OnClickListener {
 		public void onClick(View v) {
 			if (LastTask != null)
-				LastTask.cancel(true);
+				LastTask.cancel(false);
 			ShowMessage("正在读取数据...");
 			LastTask = new LoginGetToDateTask3().execute();
 		}
@@ -296,15 +294,13 @@ public class DisplayMessageActivity extends Activity {
 		public void onClick(View v) {
 			if (!login)
 				return;
+			// Cancel whatever task we have
+			if (LastTask != null)
+				LastTask.cancel(false);
 			c.add(Calendar.DATE, -1);
 			SetCurrentDate();
 			ShowMessage("正在读取数据...");
-			if (LastTask != null)
-				LastTask.cancel(true);
-			if (isToday(c))
-				LastTask = new GetToDateHomeWorkTask2().execute();
-			else
-				LastTask = new GetToDateHomeWorkTask1().execute();
+			GetToDateHomeWorkTaskWithCache();
 		}
 	}
 
@@ -312,15 +308,13 @@ public class DisplayMessageActivity extends Activity {
 		public void onClick(View v) {
 			if (!login)
 				return;
+			// Cancel whatever task we have
+			if (LastTask != null)
+				LastTask.cancel(false);
 			c.add(Calendar.DATE, 1);
 			SetCurrentDate();
 			ShowMessage("正在读取数据...");
-			if (LastTask != null)
-				LastTask.cancel(true);
-			if (isToday(c))
-				LastTask = new GetToDateHomeWorkTask2().execute();
-			else
-				LastTask = new GetToDateHomeWorkTask1().execute();
+			GetToDateHomeWorkTaskWithCache();
 		}
 	}
 
@@ -503,7 +497,7 @@ public class DisplayMessageActivity extends Activity {
 
 				ShowMessage("登录成功！正在读取数据...");
 				if (LastTask != null)
-					LastTask.cancel(true);
+					LastTask.cancel(false);
 				LastTask = new GetTodayHomeWorkTask().execute();
 			}
 		}
@@ -543,7 +537,7 @@ public class DisplayMessageActivity extends Activity {
 
 				ShowMessage("正在读取数据...");
 				if (LastTask != null)
-					LastTask.cancel(true);
+					LastTask.cancel(false);
 				LastTask = new GetToDateHomeWorkTask3().execute();
 			}
 		}
@@ -822,38 +816,16 @@ public class DisplayMessageActivity extends Activity {
 
 		protected Long doInBackground(URL... urls) {
 			try {
+				if (isCancelled())
+					return (long) 1;
+
 				// Fetch from database first
 				HW = HWDB.getRecords(UserName, date);
 				if (HW[0] != null) {
 					DisplayHomeWork(HW);
 				}
 				
-				HW = GetTodayHomeWork1();
-			} catch (Exception pce) {
-				// Log.e("DisplayMessageActivity", "PCE " + pce.getMessage());
-			}
-			return (long) 1;
-		}
-
-		protected void onPostExecute(Long result) {
-			DisplayHomeWork(HW);
-		}
-	}
-
-	private class GetToDateHomeWorkTask1 extends AsyncTask<URL, Integer, Long> {
-		private String[] HW = new String[10];
-
-		protected Long doInBackground(URL... urls) {
-			try {
-				if (isCancelled())
-					return (long) 1;
-
-				// Fetch from database first
-				HW = HWDB.getRecords(UserName, date);
-				
-				// Read from network only if homework is empty
-				if (HW[0] == null)
-					HW = GetToDateHomeWork();
+				HW = GetTodayHomeWork();
 			} catch (Exception pce) {
 				// Log.e("DisplayMessageActivity", "PCE " + pce.getMessage());
 			}
@@ -867,7 +839,26 @@ public class DisplayMessageActivity extends Activity {
 		}
 	}
 
-	private class GetToDateHomeWorkTask2 extends AsyncTask<URL, Integer, Long> {
+	private void GetToDateHomeWorkTaskWithCache() {
+		String[] HW = new String[10];
+
+		// Cancel whatever task we have
+		if (LastTask != null)
+			LastTask.cancel(false);
+
+		// Fetch from database first
+		HW = HWDB.getRecords(UserName, date);
+		if (HW[0] != null) {
+			DisplayHomeWork(HW);
+		}
+
+		if (isToday(c)) {
+			// Read from network forever from network for today
+			LastTask = new GetToDateHomeWorkTask().execute();
+		}
+	}
+
+	private class GetToDateHomeWorkTask extends AsyncTask<URL, Integer, Long> {
 		private String[] HW = new String[10];
 
 		protected Long doInBackground(URL... urls) {
@@ -875,15 +866,6 @@ public class DisplayMessageActivity extends Activity {
 				if (isCancelled())
 					return (long) 1;
 
-				// Fetch from database first
-				HW = HWDB.getRecords(UserName, date);
-
-				// Display homework first
-				if (HW[0] != null) {
-					DisplayHomeWork(HW);
-				}
-
-				// Always read from network
 				HW = GetToDateHomeWork();
 			} catch (Exception pce) {
 				// Log.e("DisplayMessageActivity", "PCE " + pce.getMessage());
@@ -1014,7 +996,7 @@ public class DisplayMessageActivity extends Activity {
 		// Get HomeWork by trying twice
 		String[] HomeWork = new String[10];
 		try {
-			for (int i = 0; i < 2; i++) {
+			for (int i = 0; i < 1; i++) {
 				ViewState = GetOldViewState("http://www.fushanedu.cn/jxq/jxq_User_jtzyck.aspx");
 
 				HttpResponse httpResponse = null;
@@ -1077,7 +1059,7 @@ public class DisplayMessageActivity extends Activity {
 		return HomeWork;
 	}
 
-	public String[] GetTodayHomeWork1() {
+	public String[] GetTodayHomeWork() {
 		String[] HomeWork = new String[10];
 
 		try {
@@ -1227,7 +1209,7 @@ public class DisplayMessageActivity extends Activity {
 
 			ShowMessage("正在登录网络...");
 			if (LastTask != null)
-				LastTask.cancel(true);
+				LastTask.cancel(false);
 			LastTask = new LoginTask().execute();
 			return true;
 		}
@@ -1244,7 +1226,7 @@ public class DisplayMessageActivity extends Activity {
 
 			ShowMessage("正在登录网络...");
 			if (LastTask != null)
-				LastTask.cancel(true);
+				LastTask.cancel(false);
 			LastTask = new LoginTask().execute();
 			return true;
 		}
@@ -1308,7 +1290,7 @@ public class DisplayMessageActivity extends Activity {
 			// Try new login
 			ShowMessage("正在登录网络...");
 			if (LastTask != null)
-				LastTask.cancel(true);
+				LastTask.cancel(false);
 			LastTask = new LoginTask().execute();
 			break;
 		case RESULT_CANCELED:
