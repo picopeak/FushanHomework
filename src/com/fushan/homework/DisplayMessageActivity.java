@@ -498,7 +498,7 @@ public class DisplayMessageActivity extends Activity {
 				ShowMessage("登录成功！正在读取数据...");
 				if (LastTask != null)
 					LastTask.cancel(false);
-				LastTask = new GetTodayHomeWorkTask().execute();
+				GetToDateHomeWorkTaskWithCache();
 			}
 		}
 	}
@@ -538,7 +538,7 @@ public class DisplayMessageActivity extends Activity {
 				ShowMessage("正在读取数据...");
 				if (LastTask != null)
 					LastTask.cancel(false);
-				LastTask = new GetToDateHomeWorkTask3().execute();
+				LastTask = new GetToDateHomeWorkTask().execute();
 			}
 		}
 	}
@@ -819,12 +819,6 @@ public class DisplayMessageActivity extends Activity {
 				if (isCancelled())
 					return (long) 1;
 
-				// Fetch from database first
-				HW = HWDB.getRecords(UserName, date);
-				if (HW[0] != null) {
-					DisplayHomeWork(HW);
-				}
-				
 				HW = GetTodayHomeWork();
 			} catch (Exception pce) {
 				// Log.e("DisplayMessageActivity", "PCE " + pce.getMessage());
@@ -853,8 +847,7 @@ public class DisplayMessageActivity extends Activity {
 		}
 
 		if (isToday(c)) {
-			// Read from network forever from network for today
-			LastTask = new GetToDateHomeWorkTask().execute();
+			LastTask = new GetTodayHomeWorkTask().execute();
 		}
 	}
 
@@ -866,29 +859,6 @@ public class DisplayMessageActivity extends Activity {
 				if (isCancelled())
 					return (long) 1;
 
-				HW = GetToDateHomeWork();
-			} catch (Exception pce) {
-				// Log.e("DisplayMessageActivity", "PCE " + pce.getMessage());
-			}
-			return (long) 1;
-		}
-
-		protected void onPostExecute(Long result) {
-			if (isCancelled())
-				return;
-			DisplayHomeWork(HW);
-		}
-	}
-
-	private class GetToDateHomeWorkTask3 extends AsyncTask<URL, Integer, Long> {
-		private String[] HW = new String[10];
-
-		protected Long doInBackground(URL... urls) {
-			try {
-				if (isCancelled())
-					return (long) 1;
-
-				// Always read from network
 				HW = GetToDateHomeWork();
 			} catch (Exception pce) {
 				// Log.e("DisplayMessageActivity", "PCE " + pce.getMessage());
