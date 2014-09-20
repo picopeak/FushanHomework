@@ -1043,7 +1043,7 @@ public class DisplayMessageActivity extends Activity {
 		String[] HomeWork = new String[10];
 
 		try {
-			for (int i = 0; i < 2; i++) {
+			for (int i = 0; i < 1; i++) {
 				HttpGet get = new HttpGet(
 						"http://www.fushanedu.cn/jxq/jxq_User_jtzyck.aspx");
 				HttpResponse httpResponse = null;
@@ -1054,9 +1054,7 @@ public class DisplayMessageActivity extends Activity {
 					get.abort();
 					
 					// Write into database
-					if (HomeWork[0] != "今日没有作业") {
-						HWDB.createRecords(UserName, getDate(c), HomeWork);
-					}
+					HWDB.createRecords(UserName, getDate(c), HomeWork);
 
 					return HomeWork;
 				} else {
