@@ -65,6 +65,7 @@ import android.text.Html.ImageGetter;
 import android.text.method.LinkMovementMethod;
 import android.util.Base64;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -261,9 +262,9 @@ public class DisplayMessageActivity extends Activity {
 				c.add(Calendar.DATE, 1);
 				mPager.setCurrentItem(1, false);
 				ShowMessage("正在读取数据...");
-			}/* else {
+			} else {
 				return;
-			}*/
+			}
 			if (LastTask != null)
 				LastTask.cancel(false);
 
@@ -566,6 +567,134 @@ public class DisplayMessageActivity extends Activity {
 		HomeWork.setAdapter(adapter);
 	}
 
+	private String[] GetToDateHomeWork(Calendar c, GetToDateHomeWorkTask t) throws ParseException {
+		// Read from network...
+		
+		// Covert Date. The day after 2000/1/1, e.g. 2013/12/29 is 5111
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		Date beginDate = format.parse("2000-01-01");
+		
+		// Get the date to display homework
+		Date endDate = c.getTime();
+		long day = (endDate.getTime() - beginDate.getTime())
+				/ (24 * 60 * 60 * 1000);
+
+		// Get HomeWork by trying twice
+		String[] HomeWork = new String[10];
+		try {
+			for (int i = 0; i < 2; i++) {
+				ViewState = GetOldViewState("http://www.fushanedu.cn/jxq/jxq_User_jtzyck.aspx");
+
+				HttpResponse httpResponse = null;
+				HttpPost httppost = new HttpPost(
+						"http://www.fushanedu.cn/jxq/jxq_User_jtzyck.aspx");
+				httppost.addHeader("Content-Type",
+						"application/x-www-form-urlencoded");
+
+				List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+				nameValuePairs.add(new BasicNameValuePair("__EVENTTARGET",
+						"MyCalendar"));
+				nameValuePairs.add(new BasicNameValuePair("__EVENTARGUMENT", ""
+						+ day));
+
+				// For v2.0 and below
+				// nameValuePairs.add(new BasicNameValuePair("__VIEWSTATE",
+				// "dDwxOTkyMjgzMzMzO3Q8O2w8aTwxPjs+O2w8dDw7bDxpPDE+O2k8Mz47aTw0PjtpPDU+O2k8Nj47aTw3Pjs+O2w8dDw7bDxpPDI+O2k8Mz47aTw0PjtpPDY+O2k8OD47aTw5PjtpPDExPjtpPDEzPjtpPDE1PjtpPDE3PjtpPDE5Pjs+O2w8dDxwPHA8bDxWaXNpYmxlOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxFbmFibGVkOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxFbmFibGVkOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxGb3JlQ29sb3I7VGV4dDtfIVNCOz47bDwyPDMwLCAyMDAsIDMwPjvliJjnlYUo5a626ZW/KSzmgqjlpb3vvIHmrKLov47kvb/nlKgg5a625qCh5qGlIOagj+ebruOAgjtpPDQ+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPHQ+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPHQ+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPHQ+Oz4+Oz47Oz47Pj47dDxAMDxwPHA8bDxTRDs+O2w8bDxTeXN0ZW0uRGF0ZVRpbWUsIG1zY29ybGliLCBWZXJzaW9uPTEuMC41MDAwLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OTwyMDEzLTEyLTI5Pjs+Oz4+Oz47Ozs7Ozs7Ozs7Pjs7Pjt0PHQ8cDxwPGw8RGF0YVRleHRGaWVsZDtEYXRhVmFsdWVGaWVsZDs+O2w8U2Nob29sTmFtZTtTY2hvb2xJRDs+Pjs+O3Q8aTwxPjtAPOeRnuWNjuagoeWMujs+O0A8Nzs+PjtsPGk8MD47Pj47Oz47dDx0PHA8cDxsPERhdGFUZXh0RmllbGQ7RGF0YVZhbHVlRmllbGQ7PjtsPEdyYWRlTmFtZTtHcmFkZUlEOz4+Oz47dDxpPDE+O0A85LiA5bm057qnOz47QDwzMDQ7Pj47bDxpPDA+Oz4+Ozs+O3Q8dDxwPHA8bDxEYXRhVGV4dEZpZWxkO0RhdGFWYWx1ZUZpZWxkOz47bDxDbGFzc05hbWU7Q2xhc3NJRDs+Pjs+O3Q8aTwxPjtAPDjnj607PjtAPDE5OTA7Pj47bDxpPDA+Oz4+Ozs+O3Q8cDxwPGw8VGV4dDs+O2w85oKo5b2T5YmN5p+l55yL55qE5pivIFw8Ylw+MjAxMy0xMi0yOSAg55Ge5Y2O5qCh5Yy6ICDkuIDlubTnuqcgIDjnj61cPC9iXD4gIOeahOWutuW6reS9nOS4mjs+Pjs+Ozs+Oz4+Oz4+O2w8bG9naW46YnRuZ3VhbmxpO2xvZ2luOmJ0bmhlbHA7bG9naW46YnRubG9nb3V0Oz4+94LyYf53nRfAOHwdbhL2sO77zS4="));
+
+				// For v3.0 and above
+				// nameValuePairs.add(new BasicNameValuePair("__VIEWSTATE",
+				// "dDwxOTkyMjgzMzMzO3Q8O2w8aTwxPjs+O2w8dDw7bDxpPDE+O2k8Mz47aTw0PjtpPDU+O2k8Nj47aTw3Pjs+O2w8dDw7bDxpPDI+O2k8Mz47aTw0PjtpPDY+O2k8OD47aTw5PjtpPDExPjtpPDEzPjtpPDE1PjtpPDE3PjtpPDE5Pjs+O2w8dDxwPHA8bDxWaXNpYmxlOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxFbmFibGVkOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxFbmFibGVkOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxGb3JlQ29sb3I7VGV4dDtfIVNCOz47bDwyPDMwLCAyMDAsIDMwPjvliJjnlYUo5a626ZW/KSzmgqjlpb3vvIHmrKLov47kvb/nlKgg5a625qCh5qGlIOagj+ebruOAgjtpPDQ+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPHQ+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPHQ+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPHQ+Oz4+Oz47Oz47Pj47dDxAMDxwPHA8bDxTRDs+O2w8bDxTeXN0ZW0uRGF0ZVRpbWUsIG1zY29ybGliLCBWZXJzaW9uPTEuMC41MDAwLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OTwyMDE0LTAyLTEzPjs+Oz4+Oz47Ozs7Ozs7Ozs7Pjs7Pjt0PHQ8cDxwPGw8RGF0YVRleHRGaWVsZDtEYXRhVmFsdWVGaWVsZDs+O2w8U2Nob29sTmFtZTtTY2hvb2xJRDs+Pjs+O3Q8aTwxPjtAPOeRnuWNjuagoeWMujs+O0A8Nzs+PjtsPGk8MD47Pj47Oz47dDx0PHA8cDxsPERhdGFUZXh0RmllbGQ7RGF0YVZhbHVlRmllbGQ7PjtsPEdyYWRlTmFtZTtHcmFkZUlEOz4+Oz47dDxpPDE+O0A85LiA5bm057qnOz47QDwzMzU7Pj47bDxpPDA+Oz4+Ozs+O3Q8dDxwPHA8bDxEYXRhVGV4dEZpZWxkO0RhdGFWYWx1ZUZpZWxkOz47bDxDbGFzc05hbWU7Q2xhc3NJRDs+Pjs+O3Q8aTwxPjtAPDjnj607PjtAPDIwNDg7Pj47bDxpPDA+Oz4+Ozs+O3Q8cDxwPGw8VGV4dDs+O2w85oKo5b2T5YmN5p+l55yL55qE5pivIFw8Ylw+MjAxNC0yLTEzICDnkZ7ljY7moKHljLogIOS4gOW5tOe6pyAgOOePrVw8L2JcPiAg55qE5a625bqt5L2c5LiaOz4+Oz47Oz47Pj47Pj47bDxsb2dpbjpidG5ndWFubGk7bG9naW46YnRuaGVscDtsb2dpbjpidG5sb2dvdXQ7Pj42BXDTJq0rubcerSCrW9xixkDTsw=="));
+
+				nameValuePairs.add(new BasicNameValuePair("__VIEWSTATE",
+						ViewState));
+
+				nameValuePairs.add(new BasicNameValuePair("SchoolName", "7"));
+				nameValuePairs.add(new BasicNameValuePair("GradeName", "304"));
+				nameValuePairs.add(new BasicNameValuePair("ClassName", "1990"));
+				httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs,
+						"GB2312"));
+				httpResponse = httpclient.execute(httppost);
+				if (t.isCancelled())
+					return HomeWork;
+				int SC = httpResponse.getStatusLine().getStatusCode();
+				if (t.isCancelled())
+					return HomeWork;
+				if (SC == 200) {
+					HomeWork = ReadHomeWork(httpResponse);
+					httppost.abort();
+					
+					if (!isToday(c)) {
+						// Write into database
+						if (HomeWork[0] != "今日没有作业") {
+							// Log.e("GetToDateHomeWork", getDate(c));
+							if (t.isCancelled())
+								return HomeWork;
+							HWDB.createRecords(UserName, getDate(c), HomeWork);
+						}
+					}
+					
+					return HomeWork;
+				} else {
+					httppost.abort();
+					if (!Login())
+						break;
+				}
+			}
+		} catch (ClientProtocolException e) {
+			HomeWork[0] = e.toString();
+			// Log.e("DisplayMessageActivity", "E " + e.getMessage());
+		} catch (Exception e) {
+			HomeWork[0] = e.toString();
+			// Log.e("DisplayMessageActivity", "E " + e.getMessage());
+		}
+
+		HomeWork[0] = "请检查网络连接2...";
+		return HomeWork;
+	}
+
+	public String[] GetTodayHomeWork(Calendar c, GetTodayHomeWorkTask t) {
+		String[] HomeWork = new String[10];
+
+		try {
+			for (int i = 0; i < 1; i++) {
+				HttpGet get = new HttpGet(
+						"http://www.fushanedu.cn/jxq/jxq_User_jtzyck.aspx");
+				HttpResponse httpResponse = null;
+				httpResponse = httpclient.execute(get);
+				if (t.isCancelled())
+					return HomeWork;
+				int SC = httpResponse.getStatusLine().getStatusCode();
+				if (t.isCancelled())
+					return HomeWork;
+				if (SC == 200) {
+					HomeWork = ReadHomeWork(httpResponse);
+					get.abort();
+					
+					// Write into database
+					if (t.isCancelled())
+						return HomeWork;
+					// Log.e("GetTodayHomeWork", getDate(c));
+					HWDB.createRecords(UserName, getDate(c), HomeWork);
+
+					return HomeWork;
+				} else {
+					get.abort();
+					if (!Login())
+						break;
+				}
+			}
+		} catch (ClientProtocolException e) {
+			HomeWork[0] = e.toString();
+			// Log.e("DisplayMessageActivity", "E " + e.getMessage());
+		} catch (IOException e) {
+			HomeWork[0] = e.toString();
+			// Log.e("DisplayMessageActivity", "E " + e.getMessage());
+		}
+
+		HomeWork[0] = "请检查网络连接3...";
+		return HomeWork;
+	}
+	
 	// Get homework data facility
 	private class GetTodayHomeWorkTask extends AsyncTask<Calendar, Integer, Long> {
 		private String[] HW = new String[10];
@@ -577,7 +706,8 @@ public class DisplayMessageActivity extends Activity {
 					return (long) 1;
 
 				c = parms[0];
-				HW = GetTodayHomeWork(c);
+				// Log.e("GetTodayHomeWorkTask", getDate(c));
+				HW = GetTodayHomeWork(c, this);
 			} catch (Exception pce) {
 				// Log.e("DisplayMessageActivity", "PCE " + pce.getMessage());
 			}
@@ -605,6 +735,7 @@ public class DisplayMessageActivity extends Activity {
 		}
 
 		if (isToday(c)) {
+			// Log.e("GetToDateHomeWorkTaskWithCache", getDate(c));
 			LastTask = new GetTodayHomeWorkTask().execute(c);
 		}
 	}
@@ -619,7 +750,7 @@ public class DisplayMessageActivity extends Activity {
 					return (long) 1;
 
 				c = parms[0];
-				HW = GetToDateHomeWork(c);
+				HW = GetToDateHomeWork(c, this);
 			} catch (Exception pce) {
 				// Log.e("DisplayMessageActivity", "PCE " + pce.getMessage());
 			}
@@ -708,120 +839,6 @@ public class DisplayMessageActivity extends Activity {
 		}
 
 		HomeWork[0] = "请检查网络连接1...";
-		return HomeWork;
-	}
-
-	private String[] GetToDateHomeWork(Calendar c) throws ParseException {
-		// Read from network...
-		
-		// Covert Date. The day after 2000/1/1, e.g. 2013/12/29 is 5111
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-		Date beginDate = format.parse("2000-01-01");
-		
-		// Get the date to display homework
-		Date endDate = c.getTime();
-		long day = (endDate.getTime() - beginDate.getTime())
-				/ (24 * 60 * 60 * 1000);
-
-		// Get HomeWork by trying twice
-		String[] HomeWork = new String[10];
-		try {
-			for (int i = 0; i < 1; i++) {
-				ViewState = GetOldViewState("http://www.fushanedu.cn/jxq/jxq_User_jtzyck.aspx");
-
-				HttpResponse httpResponse = null;
-				HttpPost httppost = new HttpPost(
-						"http://www.fushanedu.cn/jxq/jxq_User_jtzyck.aspx");
-				httppost.addHeader("Content-Type",
-						"application/x-www-form-urlencoded");
-
-				List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-				nameValuePairs.add(new BasicNameValuePair("__EVENTTARGET",
-						"MyCalendar"));
-				nameValuePairs.add(new BasicNameValuePair("__EVENTARGUMENT", ""
-						+ day));
-
-				// For v2.0 and below
-				// nameValuePairs.add(new BasicNameValuePair("__VIEWSTATE",
-				// "dDwxOTkyMjgzMzMzO3Q8O2w8aTwxPjs+O2w8dDw7bDxpPDE+O2k8Mz47aTw0PjtpPDU+O2k8Nj47aTw3Pjs+O2w8dDw7bDxpPDI+O2k8Mz47aTw0PjtpPDY+O2k8OD47aTw5PjtpPDExPjtpPDEzPjtpPDE1PjtpPDE3PjtpPDE5Pjs+O2w8dDxwPHA8bDxWaXNpYmxlOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxFbmFibGVkOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxFbmFibGVkOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxGb3JlQ29sb3I7VGV4dDtfIVNCOz47bDwyPDMwLCAyMDAsIDMwPjvliJjnlYUo5a626ZW/KSzmgqjlpb3vvIHmrKLov47kvb/nlKgg5a625qCh5qGlIOagj+ebruOAgjtpPDQ+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPHQ+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPHQ+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPHQ+Oz4+Oz47Oz47Pj47dDxAMDxwPHA8bDxTRDs+O2w8bDxTeXN0ZW0uRGF0ZVRpbWUsIG1zY29ybGliLCBWZXJzaW9uPTEuMC41MDAwLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OTwyMDEzLTEyLTI5Pjs+Oz4+Oz47Ozs7Ozs7Ozs7Pjs7Pjt0PHQ8cDxwPGw8RGF0YVRleHRGaWVsZDtEYXRhVmFsdWVGaWVsZDs+O2w8U2Nob29sTmFtZTtTY2hvb2xJRDs+Pjs+O3Q8aTwxPjtAPOeRnuWNjuagoeWMujs+O0A8Nzs+PjtsPGk8MD47Pj47Oz47dDx0PHA8cDxsPERhdGFUZXh0RmllbGQ7RGF0YVZhbHVlRmllbGQ7PjtsPEdyYWRlTmFtZTtHcmFkZUlEOz4+Oz47dDxpPDE+O0A85LiA5bm057qnOz47QDwzMDQ7Pj47bDxpPDA+Oz4+Ozs+O3Q8dDxwPHA8bDxEYXRhVGV4dEZpZWxkO0RhdGFWYWx1ZUZpZWxkOz47bDxDbGFzc05hbWU7Q2xhc3NJRDs+Pjs+O3Q8aTwxPjtAPDjnj607PjtAPDE5OTA7Pj47bDxpPDA+Oz4+Ozs+O3Q8cDxwPGw8VGV4dDs+O2w85oKo5b2T5YmN5p+l55yL55qE5pivIFw8Ylw+MjAxMy0xMi0yOSAg55Ge5Y2O5qCh5Yy6ICDkuIDlubTnuqcgIDjnj61cPC9iXD4gIOeahOWutuW6reS9nOS4mjs+Pjs+Ozs+Oz4+Oz4+O2w8bG9naW46YnRuZ3VhbmxpO2xvZ2luOmJ0bmhlbHA7bG9naW46YnRubG9nb3V0Oz4+94LyYf53nRfAOHwdbhL2sO77zS4="));
-
-				// For v3.0 and above
-				// nameValuePairs.add(new BasicNameValuePair("__VIEWSTATE",
-				// "dDwxOTkyMjgzMzMzO3Q8O2w8aTwxPjs+O2w8dDw7bDxpPDE+O2k8Mz47aTw0PjtpPDU+O2k8Nj47aTw3Pjs+O2w8dDw7bDxpPDI+O2k8Mz47aTw0PjtpPDY+O2k8OD47aTw5PjtpPDExPjtpPDEzPjtpPDE1PjtpPDE3PjtpPDE5Pjs+O2w8dDxwPHA8bDxWaXNpYmxlOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxFbmFibGVkOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxFbmFibGVkOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxGb3JlQ29sb3I7VGV4dDtfIVNCOz47bDwyPDMwLCAyMDAsIDMwPjvliJjnlYUo5a626ZW/KSzmgqjlpb3vvIHmrKLov47kvb/nlKgg5a625qCh5qGlIOagj+ebruOAgjtpPDQ+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPHQ+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPHQ+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPGY+Oz4+Oz47Oz47dDxwPHA8bDxWaXNpYmxlOz47bDxvPHQ+Oz4+Oz47Oz47Pj47dDxAMDxwPHA8bDxTRDs+O2w8bDxTeXN0ZW0uRGF0ZVRpbWUsIG1zY29ybGliLCBWZXJzaW9uPTEuMC41MDAwLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OTwyMDE0LTAyLTEzPjs+Oz4+Oz47Ozs7Ozs7Ozs7Pjs7Pjt0PHQ8cDxwPGw8RGF0YVRleHRGaWVsZDtEYXRhVmFsdWVGaWVsZDs+O2w8U2Nob29sTmFtZTtTY2hvb2xJRDs+Pjs+O3Q8aTwxPjtAPOeRnuWNjuagoeWMujs+O0A8Nzs+PjtsPGk8MD47Pj47Oz47dDx0PHA8cDxsPERhdGFUZXh0RmllbGQ7RGF0YVZhbHVlRmllbGQ7PjtsPEdyYWRlTmFtZTtHcmFkZUlEOz4+Oz47dDxpPDE+O0A85LiA5bm057qnOz47QDwzMzU7Pj47bDxpPDA+Oz4+Ozs+O3Q8dDxwPHA8bDxEYXRhVGV4dEZpZWxkO0RhdGFWYWx1ZUZpZWxkOz47bDxDbGFzc05hbWU7Q2xhc3NJRDs+Pjs+O3Q8aTwxPjtAPDjnj607PjtAPDIwNDg7Pj47bDxpPDA+Oz4+Ozs+O3Q8cDxwPGw8VGV4dDs+O2w85oKo5b2T5YmN5p+l55yL55qE5pivIFw8Ylw+MjAxNC0yLTEzICDnkZ7ljY7moKHljLogIOS4gOW5tOe6pyAgOOePrVw8L2JcPiAg55qE5a625bqt5L2c5LiaOz4+Oz47Oz47Pj47Pj47bDxsb2dpbjpidG5ndWFubGk7bG9naW46YnRuaGVscDtsb2dpbjpidG5sb2dvdXQ7Pj42BXDTJq0rubcerSCrW9xixkDTsw=="));
-
-				nameValuePairs.add(new BasicNameValuePair("__VIEWSTATE",
-						ViewState));
-
-				nameValuePairs.add(new BasicNameValuePair("SchoolName", "7"));
-				nameValuePairs.add(new BasicNameValuePair("GradeName", "304"));
-				nameValuePairs.add(new BasicNameValuePair("ClassName", "1990"));
-				httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs,
-						"GB2312"));
-				httpResponse = httpclient.execute(httppost);
-				int SC = httpResponse.getStatusLine().getStatusCode();
-				if (SC == 200) {
-					HomeWork = ReadHomeWork(httpResponse);
-					httppost.abort();
-					
-					if (!isToday(c)) {
-						// Write into database
-						if (HomeWork[0] != "今日没有作业") {
-							HWDB.createRecords(UserName, getDate(c), HomeWork);
-						}
-					}
-					
-					return HomeWork;
-				} else {
-					httppost.abort();
-					if (!Login())
-						break;
-				}
-			}
-		} catch (ClientProtocolException e) {
-			HomeWork[0] = e.toString();
-			// Log.e("DisplayMessageActivity", "E " + e.getMessage());
-		} catch (Exception e) {
-			HomeWork[0] = e.toString();
-			// Log.e("DisplayMessageActivity", "E " + e.getMessage());
-		}
-
-		HomeWork[0] = "请检查网络连接2...";
-		return HomeWork;
-	}
-
-	public String[] GetTodayHomeWork(Calendar c) {
-		String[] HomeWork = new String[10];
-
-		try {
-			for (int i = 0; i < 1; i++) {
-				HttpGet get = new HttpGet(
-						"http://www.fushanedu.cn/jxq/jxq_User_jtzyck.aspx");
-				HttpResponse httpResponse = null;
-				httpResponse = httpclient.execute(get);
-				int SC = httpResponse.getStatusLine().getStatusCode();
-				if (SC == 200) {
-					HomeWork = ReadHomeWork(httpResponse);
-					get.abort();
-					
-					// Write into database
-					HWDB.createRecords(UserName, getDate(c), HomeWork);
-
-					return HomeWork;
-				} else {
-					get.abort();
-					if (!Login())
-						break;
-				}
-			}
-		} catch (ClientProtocolException e) {
-			HomeWork[0] = e.toString();
-			// Log.e("DisplayMessageActivity", "E " + e.getMessage());
-		} catch (IOException e) {
-			HomeWork[0] = e.toString();
-			// Log.e("DisplayMessageActivity", "E " + e.getMessage());
-		}
-
-		HomeWork[0] = "请检查网络连接3...";
 		return HomeWork;
 	}
 

@@ -100,7 +100,7 @@ public class HomeworkDatabase {
 	        mDb = mDbHelper.getWritableDatabase();
 	        return this;
 		} catch (Exception e) {
-			Log.e("HomeworkDatabase", e.getMessage());
+			// Log.e("HomeworkDatabase", e.getMessage());
 		}
     	
     	return null;
@@ -125,7 +125,7 @@ public class HomeworkDatabase {
 		
 		if (!HasHomework) {
 			createOneRecord(user, date, "", "今日没有作业");
-			Log.e("createRecords", date);
+			// Log.e("createRecords", date);
 		}
 	}
 	
@@ -152,7 +152,7 @@ public class HomeworkDatabase {
 //			    }
 			}
 		} catch (Exception e) {
-			Log.e("HomeworkDatabase", e.getMessage());
+			// Log.e("HomeworkDatabase", e.getMessage());
 		}
 
 		return HW;
