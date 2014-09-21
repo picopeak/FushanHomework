@@ -641,10 +641,10 @@ public class DisplayMessageActivity extends Activity {
 				}
 			}
 		} catch (ClientProtocolException e) {
-			HomeWork[0] = e.toString();
+			// HomeWork[0] = e.toString();
 			// Log.e("DisplayMessageActivity", "E " + e.getMessage());
 		} catch (Exception e) {
-			HomeWork[0] = e.toString();
+			// HomeWork[0] = e.toString();
 			// Log.e("DisplayMessageActivity", "E " + e.getMessage());
 		}
 
@@ -684,14 +684,14 @@ public class DisplayMessageActivity extends Activity {
 				}
 			}
 		} catch (ClientProtocolException e) {
-			HomeWork[0] = e.toString();
+			// HomeWork[0] = e.toString();
 			// Log.e("DisplayMessageActivity", "E " + e.getMessage());
 		} catch (IOException e) {
-			HomeWork[0] = e.toString();
+			// HomeWork[0] = e.toString();
 			// Log.e("DisplayMessageActivity", "E " + e.getMessage());
 		}
 
-		HomeWork[0] = "请检查网络连接3...";
+		// HomeWork[0] = "请检查网络连接3...";
 		return HomeWork;
 	}
 	
