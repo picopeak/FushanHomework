@@ -92,7 +92,6 @@ public class DisplayMessageActivity extends Activity {
 
 	// The date to display homework
 	private Calendar c;
-	private String date;
 	
 	private HomeworkDatabase HWDB;
 	
@@ -160,8 +159,8 @@ public class DisplayMessageActivity extends Activity {
 			return false;
 	}
 
-	private void SetCurrentDate() {
-		date = getDate(c);
+	private void SetCurrentDate(Calendar c) {
+		String date = getDate(c);
 		TextView CurrentDate = (TextView) findViewById(R.id.CurrentDate);
 		CurrentDate.setText(date);
 		CurrentDate.setTextColor(Color.WHITE);
@@ -268,7 +267,7 @@ public class DisplayMessageActivity extends Activity {
 			if (LastTask != null)
 				LastTask.cancel(false);
 
-			SetCurrentDate();
+			SetCurrentDate(c);
 			GetToDateHomeWorkTaskWithCache(c);
 		}
 
@@ -298,7 +297,7 @@ public class DisplayMessageActivity extends Activity {
 			if (LastTask != null)
 				LastTask.cancel(false);
 			c.add(Calendar.DATE, -1);
-			SetCurrentDate();
+			SetCurrentDate(c);
 			ShowMessage("正在读取数据...");
 			GetToDateHomeWorkTaskWithCache(c);
 		}
@@ -312,7 +311,7 @@ public class DisplayMessageActivity extends Activity {
 			if (LastTask != null)
 				LastTask.cancel(false);
 			c.add(Calendar.DATE, 1);
-			SetCurrentDate();
+			SetCurrentDate(c);
 			ShowMessage("正在读取数据...");
 			GetToDateHomeWorkTaskWithCache(c);
 		}
@@ -486,7 +485,7 @@ public class DisplayMessageActivity extends Activity {
 			} else {
 				// create calendar
 				c = Calendar.getInstance();
-				SetCurrentDate();
+				SetCurrentDate(c);
 
 				// After login successfully, we update CurrentUser, UserName and
 				// PassWord
@@ -527,9 +526,7 @@ public class DisplayMessageActivity extends Activity {
 				intent.putExtra("CurrentUser", CurrentUser);
 				startActivityForResult(intent, 0);
 			} else {
-				// create calendar
-				// c = Calendar.getInstance();
-				SetCurrentDate();
+				SetCurrentDate(c);
 
 				// After login successfully, we update CurrentUser, UserName and
 				// PassWord
@@ -545,253 +542,6 @@ public class DisplayMessageActivity extends Activity {
 				if (LastTask != null)
 					LastTask.cancel(false);
 				LastTask = new GetToDateHomeWorkTask().execute(c);
-			}
-		}
-	}
-
-	// ////////////////////////////////////////////////////////
-	// The following is to display home work
-	// ////////////////////////////////////////////////////////
-
-	public Map<String, Drawable> imageMap;
-
-	private class MyCustomAdapter extends BaseAdapter {
-
-		private ArrayList<HashMap<String, String>> listItem = new ArrayList<HashMap<String, String>>();
-		private LayoutInflater mInflater;
-
-		public MyCustomAdapter() {
-			mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		}
-
-		public void addItem(final String item, int pos) {
-			HashMap<String, String> map = new HashMap<String, String>();
-			map.put("HomeWorkItem", item);
-			listItem.add(map);
-			notifyDataSetChanged();
-		}
-
-		@Override
-		public int getCount() {
-			return listItem.size();
-		}
-
-		@Override
-		public String getItem(int position) {
-			return listItem.get(position).get("HomeWorkItem");
-		}
-
-		@Override
-		public long getItemId(int position) {
-			return position;
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			TextView holder = null;
-			if (convertView == null) {
-				convertView = mInflater.inflate(R.layout.homework, null);
-				holder = (TextView) convertView.findViewById(R.id.HomeWorkItem);
-				holder.setMovementMethod(LinkMovementMethod.getInstance());
-				convertView.setTag(holder);
-			} else {
-				holder = (TextView) convertView.getTag();
-			}
-
-			fontsize = holder.getTextSize();
-			if (bigfont) {
-				fontsize = 24;
-				holder.setTextSize(fontsize);
-			}
-
-			URLImageParser imageGetter = new URLImageParser(HomeWork, position);
-
-			// Have to pass HomeWork(listview) here, because Html.fromHtml will
-			// be updated from time to time, so we can't keep an unique textview
-			// for async image loader.
-			holder.setText(Html.fromHtml(
-					listItem.get(position).get("HomeWorkItem"), imageGetter, null));
-			return convertView;
-		}
-	}
-
-	@SuppressWarnings("deprecation")
-	public class URLDrawable extends BitmapDrawable {
-		// the drawable that you need to set, you could set the initial drawing
-		// with the loading image if you need to
-		protected Drawable drawable;
-
-		@Override
-		public void draw(Canvas canvas) {
-			// override the draw to facilitate refresh function later
-			if (drawable != null) {
-				drawable.draw(canvas);
-			}
-		}
-	}
-
-	// This is the class to get the image embedded in homework
-	private class URLImageParser implements ImageGetter {
-		View container;
-		int pos;
-
-		/***
-		 * Construct the URLImageParser which will execute AsyncTask and refresh
-		 * the container
-		 * 
-		 * @param t
-		 * @param c
-		 */
-		public URLImageParser(View t, int pos) {
-			this.container = t;
-			this.pos = pos;
-		}
-
-		public Drawable getDrawable(String source) {
-			if (imageMap.containsKey(source)) {
-				Drawable drawable = imageMap.get(source);
-				if (drawable != null) {
-					return drawable;
-				}
-			}
-
-			URLDrawable urlDrawable = new URLDrawable();
-
-			// get the actual source
-			ImageGetterAsyncTask asyncTask = new ImageGetterAsyncTask(
-					urlDrawable);
-
-			asyncTask.execute(source);
-
-			// return reference to URLDrawable where I will change with actual
-			// image from the src tag
-			imageMap.put(source, urlDrawable);
-			return urlDrawable;
-		}
-
-		//////////////////////////////////////////////////////////
-		// The class for drawing pictures in today's homework.
-		//////////////////////////////////////////////////////////
-		public class ImageGetterAsyncTask extends
-				AsyncTask<String, Void, Drawable> {
-			URLDrawable urlDrawable;
-			float scale = 1;
-
-			public ImageGetterAsyncTask(URLDrawable d) {
-				this.urlDrawable = d;
-			}
-
-			@Override
-			protected Drawable doInBackground(String... params) {
-				String source = params[0];
-				return fetchDrawable(source);
-			}
-
-			@Override
-			protected void onPostExecute(Drawable result) {
-				// set the correct bound according to the result from HTTP call
-				urlDrawable.setBounds(0, 0, 0 + result.getIntrinsicWidth(),
-						0 + result.getIntrinsicHeight());
-
-				// change the reference of the current drawable to the result
-				// from the HTTP call
-				urlDrawable.drawable = result;
-
-				// redraw the image by invalidating the container
-				URLImageParser.this.container.invalidate();
-
-				// The children of the ViewGroup do not correspond 1-to-1 with
-				// the items in the list, for a ListView. Instead, the
-				// ViewGroup's children correspond to only those views
-				// that are visible right now. So getChildAt() operates on an
-				// index that's internal to the ViewGroup and doesn't
-				// necessarily have anything to do with the position in the list
-				// that the ListView uses.
-
-				View holder;
-				holder = HomeWork.getChildAt(pos);
-				if (holder != null) {
-					TextView tv = (TextView) holder
-							.findViewById(R.id.HomeWorkItem);
-					tv.setHeight((tv.getHeight() + (int) (result
-							.getIntrinsicHeight() * scale)));
-					// Pre ICS
-					tv.setEllipsize(null);
-				}
-			}
-
-			/***
-			 * Get the Drawable from URL
-			 * 
-			 * @param urlString
-			 * @return
-			 */
-			public Drawable fetchDrawable(String urlString) {
-				try {
-					Drawable drawable;
-					if (urlString.startsWith("data:image")) {
-						// Get image string
-						String ImageString = "";
-						Matcher m = Pattern.compile("data:image/[^;]*;base64,(.*)")
-								.matcher(urlString);
-						if (m.find()) {
-							ImageString = m.group(1);
-						}
-
-					    byte[] bytes = Base64.decode(ImageString, Base64.DEFAULT);  
-					    Bitmap bitMapImage = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);  
-						drawable = new BitmapDrawable(bitMapImage);
-						drawable.setBounds(
-								0,
-								(int) (drawable.getIntrinsicHeight() - bitMapImage.getHeight()),
-								(int) (bitMapImage.getWidth()),
-								(int) (drawable.getIntrinsicHeight()));
-						return drawable;
-					} else if (urlString.startsWith("/WEBADMIN")) {
-						urlString = "http://www.fushanedu.cn" + urlString;
-						urlString = urlString.replaceAll("/WEBADMIN", "");
-
-						InputStream is = fetch(urlString);
-						drawable = Drawable.createFromStream(is, "src");
-						if (urlString.contains("emotImages")) {
-							scale = dm.scaledDensity;
-							drawable.setBounds(
-									0,
-									(int) (drawable.getIntrinsicHeight() - fontsize),
-									(int) fontsize,
-									(int) (drawable.getIntrinsicHeight()));
-						} else {
-							// drawable.setBounds(0, 0,
-							// drawable.getIntrinsicWidth(),
-							// drawable.getIntrinsicHeight());
-							float scalew = dm.widthPixels
-									/ drawable.getIntrinsicWidth();
-							float scaleh = dm.heightPixels
-									/ drawable.getIntrinsicHeight();
-							if (scalew < scaleh)
-								scale = scalew / 2;
-							else
-								scale = scaleh / 2;
-							scale = 1;
-							drawable.setBounds(0, 0,
-									(int) (drawable.getIntrinsicWidth() * scale),
-									(int) (drawable.getIntrinsicHeight() * scale));
-						}
-						return drawable;
-					} else {
-						return null;
-					}
-				} catch (Exception e) {
-					return null;
-				}
-			}
-
-			private InputStream fetch(String urlString)
-					throws MalformedURLException, IOException {
-				DefaultHttpClient httpClient = new DefaultHttpClient();
-				HttpGet request = new HttpGet(urlString);
-				HttpResponse response = httpClient.execute(request);
-				return response.getEntity().getContent();
 			}
 		}
 	}
@@ -1076,6 +826,253 @@ public class DisplayMessageActivity extends Activity {
 	}
 
 	// ////////////////////////////////////////////////////////
+	// The following is to display home work
+	// ////////////////////////////////////////////////////////
+
+	public Map<String, Drawable> imageMap;
+
+	private class MyCustomAdapter extends BaseAdapter {
+
+		private ArrayList<HashMap<String, String>> listItem = new ArrayList<HashMap<String, String>>();
+		private LayoutInflater mInflater;
+
+		public MyCustomAdapter() {
+			mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		}
+
+		public void addItem(final String item, int pos) {
+			HashMap<String, String> map = new HashMap<String, String>();
+			map.put("HomeWorkItem", item);
+			listItem.add(map);
+			notifyDataSetChanged();
+		}
+
+		@Override
+		public int getCount() {
+			return listItem.size();
+		}
+
+		@Override
+		public String getItem(int position) {
+			return listItem.get(position).get("HomeWorkItem");
+		}
+
+		@Override
+		public long getItemId(int position) {
+			return position;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			TextView holder = null;
+			if (convertView == null) {
+				convertView = mInflater.inflate(R.layout.homework, null);
+				holder = (TextView) convertView.findViewById(R.id.HomeWorkItem);
+				holder.setMovementMethod(LinkMovementMethod.getInstance());
+				convertView.setTag(holder);
+			} else {
+				holder = (TextView) convertView.getTag();
+			}
+
+			fontsize = holder.getTextSize();
+			if (bigfont) {
+				fontsize = 24;
+				holder.setTextSize(fontsize);
+			}
+
+			URLImageParser imageGetter = new URLImageParser(HomeWork, position);
+
+			// Have to pass HomeWork(listview) here, because Html.fromHtml will
+			// be updated from time to time, so we can't keep an unique textview
+			// for async image loader.
+			holder.setText(Html.fromHtml(
+					listItem.get(position).get("HomeWorkItem"), imageGetter, null));
+			return convertView;
+		}
+	}
+
+	@SuppressWarnings("deprecation")
+	public class URLDrawable extends BitmapDrawable {
+		// the drawable that you need to set, you could set the initial drawing
+		// with the loading image if you need to
+		protected Drawable drawable;
+
+		@Override
+		public void draw(Canvas canvas) {
+			// override the draw to facilitate refresh function later
+			if (drawable != null) {
+				drawable.draw(canvas);
+			}
+		}
+	}
+
+	// This is the class to get the image embedded in homework
+	private class URLImageParser implements ImageGetter {
+		View container;
+		int pos;
+
+		/***
+		 * Construct the URLImageParser which will execute AsyncTask and refresh
+		 * the container
+		 * 
+		 * @param t
+		 * @param c
+		 */
+		public URLImageParser(View t, int pos) {
+			this.container = t;
+			this.pos = pos;
+		}
+
+		public Drawable getDrawable(String source) {
+			if (imageMap.containsKey(source)) {
+				Drawable drawable = imageMap.get(source);
+				if (drawable != null) {
+					return drawable;
+				}
+			}
+
+			URLDrawable urlDrawable = new URLDrawable();
+
+			// get the actual source
+			ImageGetterAsyncTask asyncTask = new ImageGetterAsyncTask(
+					urlDrawable);
+
+			asyncTask.execute(source);
+
+			// return reference to URLDrawable where I will change with actual
+			// image from the src tag
+			imageMap.put(source, urlDrawable);
+			return urlDrawable;
+		}
+
+		//////////////////////////////////////////////////////////
+		// The class for drawing pictures in today's homework.
+		//////////////////////////////////////////////////////////
+		public class ImageGetterAsyncTask extends
+				AsyncTask<String, Void, Drawable> {
+			URLDrawable urlDrawable;
+			float scale = 1;
+
+			public ImageGetterAsyncTask(URLDrawable d) {
+				this.urlDrawable = d;
+			}
+
+			@Override
+			protected Drawable doInBackground(String... params) {
+				String source = params[0];
+				return fetchDrawable(source);
+			}
+
+			@Override
+			protected void onPostExecute(Drawable result) {
+				// set the correct bound according to the result from HTTP call
+				urlDrawable.setBounds(0, 0, 0 + result.getIntrinsicWidth(),
+						0 + result.getIntrinsicHeight());
+
+				// change the reference of the current drawable to the result
+				// from the HTTP call
+				urlDrawable.drawable = result;
+
+				// redraw the image by invalidating the container
+				URLImageParser.this.container.invalidate();
+
+				// The children of the ViewGroup do not correspond 1-to-1 with
+				// the items in the list, for a ListView. Instead, the
+				// ViewGroup's children correspond to only those views
+				// that are visible right now. So getChildAt() operates on an
+				// index that's internal to the ViewGroup and doesn't
+				// necessarily have anything to do with the position in the list
+				// that the ListView uses.
+
+				View holder;
+				holder = HomeWork.getChildAt(pos);
+				if (holder != null) {
+					TextView tv = (TextView) holder
+							.findViewById(R.id.HomeWorkItem);
+					tv.setHeight((tv.getHeight() + (int) (result
+							.getIntrinsicHeight() * scale)));
+					// Pre ICS
+					tv.setEllipsize(null);
+				}
+			}
+
+			/***
+			 * Get the Drawable from URL
+			 * 
+			 * @param urlString
+			 * @return
+			 */
+			public Drawable fetchDrawable(String urlString) {
+				try {
+					Drawable drawable;
+					if (urlString.startsWith("data:image")) {
+						// Get image string
+						String ImageString = "";
+						Matcher m = Pattern.compile("data:image/[^;]*;base64,(.*)")
+								.matcher(urlString);
+						if (m.find()) {
+							ImageString = m.group(1);
+						}
+
+					    byte[] bytes = Base64.decode(ImageString, Base64.DEFAULT);  
+					    Bitmap bitMapImage = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);  
+						drawable = new BitmapDrawable(bitMapImage);
+						drawable.setBounds(
+								0,
+								(int) (drawable.getIntrinsicHeight() - bitMapImage.getHeight()),
+								(int) (bitMapImage.getWidth()),
+								(int) (drawable.getIntrinsicHeight()));
+						return drawable;
+					} else if (urlString.startsWith("/WEBADMIN")) {
+						urlString = "http://www.fushanedu.cn" + urlString;
+						urlString = urlString.replaceAll("/WEBADMIN", "");
+
+						InputStream is = fetch(urlString);
+						drawable = Drawable.createFromStream(is, "src");
+						if (urlString.contains("emotImages")) {
+							scale = dm.scaledDensity;
+							drawable.setBounds(
+									0,
+									(int) (drawable.getIntrinsicHeight() - fontsize),
+									(int) fontsize,
+									(int) (drawable.getIntrinsicHeight()));
+						} else {
+							// drawable.setBounds(0, 0,
+							// drawable.getIntrinsicWidth(),
+							// drawable.getIntrinsicHeight());
+							float scalew = dm.widthPixels
+									/ drawable.getIntrinsicWidth();
+							float scaleh = dm.heightPixels
+									/ drawable.getIntrinsicHeight();
+							if (scalew < scaleh)
+								scale = scalew / 2;
+							else
+								scale = scaleh / 2;
+							scale = 1;
+							drawable.setBounds(0, 0,
+									(int) (drawable.getIntrinsicWidth() * scale),
+									(int) (drawable.getIntrinsicHeight() * scale));
+						}
+						return drawable;
+					} else {
+						return null;
+					}
+				} catch (Exception e) {
+					return null;
+				}
+			}
+
+			private InputStream fetch(String urlString)
+					throws MalformedURLException, IOException {
+				DefaultHttpClient httpClient = new DefaultHttpClient();
+				HttpGet request = new HttpGet(urlString);
+				HttpResponse response = httpClient.execute(request);
+				return response.getEntity().getContent();
+			}
+		}
+	}
+
+	// ////////////////////////////////////////////////////////
 	// Main Entry of Fushan Homework
 	// ////////////////////////////////////////////////////////
 
@@ -1110,7 +1107,7 @@ public class DisplayMessageActivity extends Activity {
 
 		// create calendar
 		c = Calendar.getInstance();
-		SetCurrentDate();
+		SetCurrentDate(c);
 		TextView CurrentDate = (TextView) findViewById(R.id.CurrentDate);
 		CurrentDate.setOnClickListener(listener3);
 

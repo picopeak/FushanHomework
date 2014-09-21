@@ -125,6 +125,7 @@ public class HomeworkDatabase {
 		
 		if (!HasHomework) {
 			createOneRecord(user, date, "", "今日没有作业");
+			Log.e("createRecords", date);
 		}
 	}
 	
