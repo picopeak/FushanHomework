@@ -656,7 +656,7 @@ public class DisplayMessageActivity extends Activity {
 		String[] HomeWork = new String[10];
 
 		try {
-			for (int i = 0; i < 1; i++) {
+			for (int i = 0; i < 2; i++) {
 				HttpGet get = new HttpGet(
 						"http://www.fushanedu.cn/jxq/jxq_User_jtzyck.aspx");
 				HttpResponse httpResponse = null;
@@ -737,6 +737,10 @@ public class DisplayMessageActivity extends Activity {
 		if (isToday(c)) {
 			// Log.e("GetToDateHomeWorkTaskWithCache", getDate(c));
 			LastTask = new GetTodayHomeWorkTask().execute(c);
+		} else {
+			if (HW[0] == null) {
+				LastTask = new GetToDateHomeWorkTask().execute(c);				
+			}
 		}
 	}
 
