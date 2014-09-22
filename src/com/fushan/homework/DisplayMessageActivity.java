@@ -79,7 +79,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-@SuppressLint({ "SimpleDateFormat", "DefaultLocale" })
+@SuppressLint({ "SimpleDateFormat", "DefaultLocale", "ShowToast" })
 public class DisplayMessageActivity extends Activity {
 
 	private HttpClient httpclient;
@@ -253,10 +253,12 @@ public class DisplayMessageActivity extends Activity {
 	public class MyOnPageChangeListener implements OnPageChangeListener {
 		@Override
 		public void onPageSelected(int arg0) {
+			/*
 			if (!login) {
 				mPager.setCurrentItem(1, false);
 				return;
 			}
+			*/
 			if (arg0 == 0) {
 				c.add(Calendar.DATE, -1);
 				mPager.setCurrentItem(1, false);
@@ -301,8 +303,10 @@ public class DisplayMessageActivity extends Activity {
 
 	class LeftArrow_OnClickListener implements OnClickListener {
 		public void onClick(View v) {
+			/*
 			if (!login)
 				return;
+			*/
 			// Cancel whatever task we have
 			if (LastTask != null)
 				LastTask.cancel(false);
@@ -317,8 +321,10 @@ public class DisplayMessageActivity extends Activity {
 
 	class RightArrow_OnClickListener implements OnClickListener {
 		public void onClick(View v) {
+			/*
 			if (!login)
 				return;
+			*/
 			// Cancel whatever task we have
 			if (LastTask != null)
 				LastTask.cancel(false);
@@ -557,10 +563,14 @@ public class DisplayMessageActivity extends Activity {
 
 		protected void onPostExecute(Long result) {
 			if (!login) {
+				Toast SM = Toast.makeText(DisplayMessageActivity.this, "请检查网络...", 1);
+				SM.show();
+				/*
 				Intent intent = new Intent();
 				intent.setClass(DisplayMessageActivity.this, MainActivity.class);
 				intent.putExtra("CurrentUser", CurrentUser);
 				startActivityForResult(intent, 0);
+				*/
 			} else {
 				SetCurrentDate(c);
 
