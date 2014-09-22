@@ -77,6 +77,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 @SuppressLint({ "SimpleDateFormat", "DefaultLocale" })
 public class DisplayMessageActivity extends Activity {
@@ -219,6 +220,8 @@ public class DisplayMessageActivity extends Activity {
 			((ViewPager) arg0).addView(view1, 0);
 
 			if (arg1 == 1) {
+				// Toast SM = Toast.makeText(DisplayMessageActivity.this, "正在登录网络...", 1);
+				// SM.show();
 				ShowMessage("正在登录网络...");
 				if (LastTask != null)
 					LastTask.cancel(false);
@@ -257,11 +260,15 @@ public class DisplayMessageActivity extends Activity {
 			if (arg0 == 0) {
 				c.add(Calendar.DATE, -1);
 				mPager.setCurrentItem(1, false);
-				ShowMessage("正在读取数据...");
+				// Toast SM = Toast.makeText(DisplayMessageActivity.this, "正在读取数据...", 1);
+				// SM.show();
+				// ShowMessage("正在读取数据...");
 			} else if (arg0 == 2) {
 				c.add(Calendar.DATE, 1);
 				mPager.setCurrentItem(1, false);
-				ShowMessage("正在读取数据...");
+				// Toast SM = Toast.makeText(DisplayMessageActivity.this, "正在读取数据...", 1);
+				// SM.show();
+				// ShowMessage("正在读取数据...");
 			} else {
 				return;
 			}
@@ -285,7 +292,9 @@ public class DisplayMessageActivity extends Activity {
 		public void onClick(View v) {
 			if (LastTask != null)
 				LastTask.cancel(false);
-			ShowMessage("正在读取数据...");
+			// Toast SM = Toast.makeText(DisplayMessageActivity.this, "正在读取数据...", 1);
+			// SM.show();
+			// ShowMessage("正在读取数据...");
 			LastTask = new LoginGetToDateTask().execute(c);
 		}
 	}
@@ -299,7 +308,9 @@ public class DisplayMessageActivity extends Activity {
 				LastTask.cancel(false);
 			c.add(Calendar.DATE, -1);
 			SetCurrentDate(c);
-			ShowMessage("正在读取数据...");
+			// Toast SM = Toast.makeText(DisplayMessageActivity.this, "正在读取数据...", 1);
+			// SM.show();
+			// ShowMessage("正在读取数据...");
 			GetToDateHomeWorkTaskWithCache(c);
 		}
 	}
@@ -313,11 +324,33 @@ public class DisplayMessageActivity extends Activity {
 				LastTask.cancel(false);
 			c.add(Calendar.DATE, 1);
 			SetCurrentDate(c);
-			ShowMessage("正在读取数据...");
+			// Toast SM = Toast.makeText(DisplayMessageActivity.this, "正在读取数据...", 1);
+			// SM.show();
+			// ShowMessage("正在读取数据...");
 			GetToDateHomeWorkTaskWithCache(c);
 		}
 	}
 
+	// Main entry of displaying homework
+	private void DisplayHomeWork(String[] HW) {
+		MyCustomAdapter adapter = new MyCustomAdapter();
+		boolean findHW = false;
+		for (int i = 0; i < 10; i++) {
+			if (HW[i] != null) {
+				findHW = true;
+				// URLImageParser p = new URLImageParser(HomeWork, this);
+				// adapter.addItem(Html.fromHtml(HW[i], p, null));
+				adapter.addItem(HW[i], i);
+			}
+		}
+
+		if (!findHW) {
+			// adapter.addItem(Html.fromHtml("今日没有作业", null, null));
+			adapter.addItem("今日没有作业", 0);
+		}
+		HomeWork.setAdapter(adapter);
+	}
+	
 	// ////////////////////////////////////////////////////////
 	// The followings are login facility
 	// ////////////////////////////////////////////////////////
@@ -498,7 +531,9 @@ public class DisplayMessageActivity extends Activity {
 				UserName = preference.getString("UserName" + CurrentUser, "");
 				PassWord = preference.getString("PassWord" + CurrentUser, "");
 
-				ShowMessage("登录成功！正在读取数据...");
+				// Toast SM = Toast.makeText(DisplayMessageActivity.this, "登录成功！正在读取数据...", 1);
+				// SM.show();
+				// ShowMessage("登录成功！正在读取数据...");
 				if (LastTask != null)
 					LastTask.cancel(false);
 				GetToDateHomeWorkTaskWithCache(c);
@@ -539,32 +574,14 @@ public class DisplayMessageActivity extends Activity {
 				UserName = preference.getString("UserName" + CurrentUser, "");
 				PassWord = preference.getString("PassWord" + CurrentUser, "");
 
-				ShowMessage("正在读取数据...");
+				Toast SM = Toast.makeText(DisplayMessageActivity.this, "正在读取数据...", 1);
+				SM.show();
+				// ShowMessage("正在读取数据...");
 				if (LastTask != null)
 					LastTask.cancel(false);
 				LastTask = new GetToDateHomeWorkTask().execute(c);
 			}
 		}
-	}
-
-	// Main entry of displaying homework
-	private void DisplayHomeWork(String[] HW) {
-		MyCustomAdapter adapter = new MyCustomAdapter();
-		boolean findHW = false;
-		for (int i = 0; i < 10; i++) {
-			if (HW[i] != null) {
-				findHW = true;
-				// URLImageParser p = new URLImageParser(HomeWork, this);
-				// adapter.addItem(Html.fromHtml(HW[i], p, null));
-				adapter.addItem(HW[i], i);
-			}
-		}
-
-		if (!findHW) {
-			// adapter.addItem(Html.fromHtml("今日没有作业", null, null));
-			adapter.addItem("今日没有作业", 0);
-		}
-		HomeWork.setAdapter(adapter);
 	}
 
 	private String[] GetToDateHomeWork(Calendar c, GetToDateHomeWorkTask t) throws ParseException {
@@ -648,7 +665,7 @@ public class DisplayMessageActivity extends Activity {
 			// Log.e("DisplayMessageActivity", "E " + e.getMessage());
 		}
 
-		HomeWork[0] = "请检查网络连接2...";
+		HomeWork[0] = "请检查网络连接";
 		return HomeWork;
 	}
 
@@ -691,7 +708,7 @@ public class DisplayMessageActivity extends Activity {
 			// Log.e("DisplayMessageActivity", "E " + e.getMessage());
 		}
 
-		// HomeWork[0] = "请检查网络连接3...";
+		HomeWork[0] = "请检查网络连接";
 		return HomeWork;
 	}
 	
@@ -717,6 +734,38 @@ public class DisplayMessageActivity extends Activity {
 		protected void onPostExecute(Long result) {
 			if (isCancelled())
 				return;
+			
+			if (HW[0] == "请检查网络连接")
+				return;
+			
+			DisplayHomeWork(HW);
+		}
+	}
+
+	private class GetToDateHomeWorkTask extends AsyncTask<Calendar, Integer, Long> {
+		private String[] HW = new String[10];
+		private Calendar c;
+
+		protected Long doInBackground(Calendar... parms) {
+			try {
+				if (isCancelled())
+					return (long) 1;
+
+				c = parms[0];
+				HW = GetToDateHomeWork(c, this);
+			} catch (Exception pce) {
+				// Log.e("DisplayMessageActivity", "PCE " + pce.getMessage());
+			}
+			return (long) 1;
+		}
+
+		protected void onPostExecute(Long result) {
+			if (isCancelled())
+				return;
+
+			if (HW[0] == "请检查网络连接")
+				return;
+			
 			DisplayHomeWork(HW);
 		}
 	}
@@ -741,30 +790,6 @@ public class DisplayMessageActivity extends Activity {
 			if (HW[0] == null) {
 				LastTask = new GetToDateHomeWorkTask().execute(c);				
 			}
-		}
-	}
-
-	private class GetToDateHomeWorkTask extends AsyncTask<Calendar, Integer, Long> {
-		private String[] HW = new String[10];
-		private Calendar c;
-
-		protected Long doInBackground(Calendar... parms) {
-			try {
-				if (isCancelled())
-					return (long) 1;
-
-				c = parms[0];
-				HW = GetToDateHomeWork(c, this);
-			} catch (Exception pce) {
-				// Log.e("DisplayMessageActivity", "PCE " + pce.getMessage());
-			}
-			return (long) 1;
-		}
-
-		protected void onPostExecute(Long result) {
-			if (isCancelled())
-				return;
-			DisplayHomeWork(HW);
 		}
 	}
 
