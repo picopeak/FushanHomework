@@ -83,7 +83,7 @@ import android.widget.Toast;
 public class DisplayMessageActivity extends Activity {
 
 	private HttpClient httpclient;
-	private ListView HomeWork;
+	private ListView HomeWork, HomeWorkL, HomeWorkR;
 	private String UserName = "";
 	private String PassWord = "";
 	private String RealName = "";
@@ -180,11 +180,15 @@ public class DisplayMessageActivity extends Activity {
 		AllViews = new ArrayList<View>();
 
 		LayoutInflater mInflater = getLayoutInflater();
-		AllViews.add(mInflater.inflate(R.layout.homework_list, null));
+		View view0 = mInflater.inflate(R.layout.homework_list, null);
+		HomeWorkL = (ListView) view0.findViewById(R.id.HomeWork);
+		AllViews.add(view0);
 		View view1 = mInflater.inflate(R.layout.homework_list, null);
 		HomeWork = (ListView) view1.findViewById(R.id.HomeWork);
 		AllViews.add(view1);
-		AllViews.add(mInflater.inflate(R.layout.homework_list, null));
+		View view2 = mInflater.inflate(R.layout.homework_list, null);
+		HomeWorkR = (ListView) view2.findViewById(R.id.HomeWork);
+		AllViews.add(view2);
 
 		mPager.setAdapter(new MyPagerAdapter(AllViews));
 
@@ -262,7 +266,29 @@ public class DisplayMessageActivity extends Activity {
 			String[] HW;
 			if (arg0 == 0) {
 				c.add(Calendar.DATE, -1);
+				Calendar y = (Calendar) c.clone(), t = (Calendar) c.clone();
+				y.add(Calendar.DATE, -1);
+				t.add(Calendar.DATE, 1);
 
+				// Fetch from database first
+				HW = HWDB.getRecords(UserName, getDate(y));
+				if (HW[0] == null) {
+					String TEMP_HW[] = new String[10];
+					TEMP_HW[0] = "";
+					DisplayHomeWorkL(TEMP_HW);
+				} else {
+					DisplayHomeWorkL(HW);
+				}
+
+				HW = HWDB.getRecords(UserName, getDate(t));
+				if (HW[0] == null) {
+					String TEMP_HW[] = new String[10];
+					TEMP_HW[0] = "";
+					DisplayHomeWorkR(TEMP_HW);
+				} else {
+					DisplayHomeWorkR(HW);
+				}
+				
 				// Fetch from database first
 				HW = HWDB.getRecords(UserName, getDate(c));
 				if (HW[0] == null) {
@@ -279,6 +305,28 @@ public class DisplayMessageActivity extends Activity {
 				// ShowMessage("正在读取数据...");
 			} else if (arg0 == 2) {
 				c.add(Calendar.DATE, 1);
+				Calendar y = (Calendar) c.clone(), t = (Calendar) c.clone();
+				y.add(Calendar.DATE, -1);
+				t.add(Calendar.DATE, 1);
+
+				// Fetch from database first
+				HW = HWDB.getRecords(UserName, getDate(y));
+				if (HW[0] == null) {
+					String TEMP_HW[] = new String[10];
+					TEMP_HW[0] = "";
+					DisplayHomeWorkL(TEMP_HW);
+				} else {
+					DisplayHomeWorkL(HW);
+				}
+
+				HW = HWDB.getRecords(UserName, getDate(t));
+				if (HW[0] == null) {
+					String TEMP_HW[] = new String[10];
+					TEMP_HW[0] = "";
+					DisplayHomeWorkR(TEMP_HW);
+				} else {
+					DisplayHomeWorkR(HW);
+				}
 
 				// Fetch from database first
 				HW = HWDB.getRecords(UserName, getDate(c));
@@ -379,7 +427,47 @@ public class DisplayMessageActivity extends Activity {
 		}
 		HomeWork.setAdapter(adapter);
 	}
-	
+
+	// Main entry of displaying homework
+	private void DisplayHomeWorkL(String[] HW) {
+		MyCustomAdapter adapter = new MyCustomAdapter();
+		boolean findHW = false;
+		for (int i = 0; i < 10; i++) {
+			if (HW[i] != null) {
+				findHW = true;
+				// URLImageParser p = new URLImageParser(HomeWork, this);
+				// adapter.addItem(Html.fromHtml(HW[i], p, null));
+				adapter.addItem(HW[i], i);
+			}
+		}
+
+		if (!findHW) {
+			// adapter.addItem(Html.fromHtml("今日没有作业", null, null));
+			adapter.addItem("今日没有作业", 0);
+		}
+		HomeWorkL.setAdapter(adapter);
+	}
+
+	// Main entry of displaying homework
+	private void DisplayHomeWorkR(String[] HW) {
+		MyCustomAdapter adapter = new MyCustomAdapter();
+		boolean findHW = false;
+		for (int i = 0; i < 10; i++) {
+			if (HW[i] != null) {
+				findHW = true;
+				// URLImageParser p = new URLImageParser(HomeWork, this);
+				// adapter.addItem(Html.fromHtml(HW[i], p, null));
+				adapter.addItem(HW[i], i);
+			}
+		}
+
+		if (!findHW) {
+			// adapter.addItem(Html.fromHtml("今日没有作业", null, null));
+			adapter.addItem("今日没有作业", 0);
+		}
+		HomeWorkR.setAdapter(adapter);
+	}
+
 	// ////////////////////////////////////////////////////////
 	// The followings are login facility
 	// ////////////////////////////////////////////////////////
@@ -559,6 +647,30 @@ public class DisplayMessageActivity extends Activity {
 				edit.commit();
 				UserName = preference.getString("UserName" + CurrentUser, "");
 				PassWord = preference.getString("PassWord" + CurrentUser, "");
+
+				Calendar y = (Calendar) c.clone(), t = (Calendar) c.clone();
+				y.add(Calendar.DATE, -1);
+				t.add(Calendar.DATE, 1);
+
+				String HW[];
+				// Fetch from database first
+				HW = HWDB.getRecords(UserName, getDate(y));
+				if (HW[0] == null) {
+					String TEMP_HW[] = new String[10];
+					TEMP_HW[0] = "";
+					DisplayHomeWorkL(TEMP_HW);
+				} else {
+					DisplayHomeWorkL(HW);
+				}
+
+				HW = HWDB.getRecords(UserName, getDate(t));
+				if (HW[0] == null) {
+					String TEMP_HW[] = new String[10];
+					TEMP_HW[0] = "";
+					DisplayHomeWorkR(TEMP_HW);
+				} else {
+					DisplayHomeWorkR(HW);
+				}
 
 				// Toast SM = Toast.makeText(DisplayMessageActivity.this, "登录成功！正在读取数据...", 1);
 				// SM.show();
