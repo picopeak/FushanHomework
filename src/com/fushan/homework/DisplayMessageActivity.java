@@ -259,14 +259,37 @@ public class DisplayMessageActivity extends Activity {
 				return;
 			}
 			*/
+			String[] HW;
 			if (arg0 == 0) {
 				c.add(Calendar.DATE, -1);
+
+				// Fetch from database first
+				HW = HWDB.getRecords(UserName, getDate(c));
+				if (HW[0] == null) {
+					String TEMP_HW[] = new String[10];
+					TEMP_HW[0] = "正在读取数据...";
+					DisplayHomeWork(TEMP_HW);
+				} else {
+					DisplayHomeWork(HW);
+				}
+				
 				mPager.setCurrentItem(1, false);
 				// Toast SM = Toast.makeText(DisplayMessageActivity.this, "正在读取数据...", 1);
 				// SM.show();
 				// ShowMessage("正在读取数据...");
 			} else if (arg0 == 2) {
 				c.add(Calendar.DATE, 1);
+
+				// Fetch from database first
+				HW = HWDB.getRecords(UserName, getDate(c));
+				if (HW[0] == null) {
+					String TEMP_HW[] = new String[10];
+					TEMP_HW[0] = "正在读取数据...";
+					DisplayHomeWork(TEMP_HW);
+				} else {
+					DisplayHomeWork(HW);
+				}
+				
 				mPager.setCurrentItem(1, false);
 				// Toast SM = Toast.makeText(DisplayMessageActivity.this, "正在读取数据...", 1);
 				// SM.show();
@@ -278,7 +301,7 @@ public class DisplayMessageActivity extends Activity {
 				LastTask.cancel(false);
 
 			SetCurrentDate(c);
-			GetToDateHomeWorkTaskWithCache(c);
+			GetToDateHomeWorkTask(c, HW);
 		}
 
 		@Override
@@ -780,18 +803,10 @@ public class DisplayMessageActivity extends Activity {
 		}
 	}
 
-	private void GetToDateHomeWorkTaskWithCache(Calendar c) {
-		String[] HW = new String[10];
-
+	private void GetToDateHomeWorkTask(Calendar c, String HW[]) {
 		// Cancel whatever task we have
 		if (LastTask != null)
 			LastTask.cancel(false);
-
-		// Fetch from database first
-		HW = HWDB.getRecords(UserName, getDate(c));
-		if (HW[0] != null) {
-			DisplayHomeWork(HW);
-		}
 
 		if (isToday(c)) {
 			// Log.e("GetToDateHomeWorkTaskWithCache", getDate(c));
@@ -801,6 +816,18 @@ public class DisplayMessageActivity extends Activity {
 				LastTask = new GetToDateHomeWorkTask().execute(c);				
 			}
 		}
+	}
+
+	private void GetToDateHomeWorkTaskWithCache(Calendar c) {
+		String[] HW = new String[10];
+
+		// Fetch from database first
+		HW = HWDB.getRecords(UserName, getDate(c));
+		if (HW[0] != null) {
+			DisplayHomeWork(HW);
+		}
+
+		GetToDateHomeWorkTask(c, HW);
 	}
 
 	// This method is to parse home work html string
@@ -1079,7 +1106,7 @@ public class DisplayMessageActivity extends Activity {
 								(int) (bitMapImage.getWidth()),
 								(int) (drawable.getIntrinsicHeight()));
 						return drawable;
-					} else if (urlString.startsWith("/WEBADMIN")) {
+					} else if (urlString.startsWith("/")) {
 						urlString = "http://www.fushanedu.cn" + urlString;
 						urlString = urlString.replaceAll("/WEBADMIN", "");
 
