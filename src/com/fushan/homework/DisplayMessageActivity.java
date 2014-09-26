@@ -224,9 +224,20 @@ public class DisplayMessageActivity extends Activity {
 			((ViewPager) arg0).addView(view1, 0);
 
 			if (arg1 == 1) {
-				// Toast SM = Toast.makeText(DisplayMessageActivity.this, "正在登录网络...", 1);
-				// SM.show();
-				ShowMessage("正在登录网络...");
+				Toast SM = Toast.makeText(DisplayMessageActivity.this, "正在登录网络...", 1);
+				SM.show();
+				// ShowMessage("正在登录网络...");
+				// Fetch from database first
+				String HW[];
+				HW = HWDB.getRecords(UserName, getDate(c));
+				if (HW[0] == null) {
+					String TEMP_HW[] = new String[10];
+					TEMP_HW[0] = "正在读取数据...";
+					DisplayHomeWork(TEMP_HW);
+				} else {
+					DisplayHomeWork(HW);
+				}
+
 				if (LastTask != null)
 					LastTask.cancel(false);
 				LastTask = new LoginTask().execute(c);
@@ -374,37 +385,11 @@ public class DisplayMessageActivity extends Activity {
 
 	class LeftArrow_OnClickListener implements OnClickListener {
 		public void onClick(View v) {
-			/*
-			if (!login)
-				return;
-			*/
-			// Cancel whatever task we have
-			if (LastTask != null)
-				LastTask.cancel(false);
-			c.add(Calendar.DATE, -1);
-			SetCurrentDate(c);
-			// Toast SM = Toast.makeText(DisplayMessageActivity.this, "正在读取数据...", 1);
-			// SM.show();
-			// ShowMessage("正在读取数据...");
-			GetToDateHomeWorkTaskWithCache(c);
 		}
 	}
 
 	class RightArrow_OnClickListener implements OnClickListener {
 		public void onClick(View v) {
-			/*
-			if (!login)
-				return;
-			*/
-			// Cancel whatever task we have
-			if (LastTask != null)
-				LastTask.cancel(false);
-			c.add(Calendar.DATE, 1);
-			SetCurrentDate(c);
-			// Toast SM = Toast.makeText(DisplayMessageActivity.this, "正在读取数据...", 1);
-			// SM.show();
-			// ShowMessage("正在读取数据...");
-			GetToDateHomeWorkTaskWithCache(c);
 		}
 	}
 
@@ -629,6 +614,8 @@ public class DisplayMessageActivity extends Activity {
 
 		protected void onPostExecute(Long result) {
 			if (!login) {
+				Toast SM = Toast.makeText(DisplayMessageActivity.this, "请检查网络...", 1);
+				SM.show();
 				Intent intent = new Intent();
 				intent.setClass(DisplayMessageActivity.this, MainActivity.class);
 				intent.putExtra("CurrentUser", CurrentUser);

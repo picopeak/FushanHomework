@@ -42,7 +42,13 @@
         android:ems="10"
         android:hint="@string/UserName"
         android:inputType="numberDecimal|textWebEditText"
-        android:singleLine="true" />
+        android:singleLine="true" >
+
+        <requestFocus />
+
+        <requestFocus />
+
+    </EditText>
 
     <Button
         android:id="@+id/Login"
