@@ -614,7 +614,7 @@ public class DisplayMessageActivity extends Activity {
 
 		protected void onPostExecute(Long result) {
 			if (!login) {
-				Toast SM = Toast.makeText(DisplayMessageActivity.this, "请检查网络...", 1);
+				Toast SM = Toast.makeText(DisplayMessageActivity.this, "请检查网络或账户密码...", 1);
 				SM.show();
 				Intent intent = new Intent();
 				intent.setClass(DisplayMessageActivity.this, MainActivity.class);
@@ -797,7 +797,7 @@ public class DisplayMessageActivity extends Activity {
 			// Log.e("DisplayMessageActivity", "E " + e.getMessage());
 		}
 
-		HomeWork[0] = "请检查网络连接";
+		HomeWork[0] = "请检查网络连接...";
 		return HomeWork;
 	}
 
@@ -840,7 +840,7 @@ public class DisplayMessageActivity extends Activity {
 			// Log.e("DisplayMessageActivity", "E " + e.getMessage());
 		}
 
-		HomeWork[0] = "请检查网络连接";
+		HomeWork[0] = "请检查网络连接...";
 		return HomeWork;
 	}
 	
@@ -867,7 +867,7 @@ public class DisplayMessageActivity extends Activity {
 			if (isCancelled())
 				return;
 			
-			if (HW[0] == "请检查网络连接")
+			if (HW[0] == "请检查网络连接...")
 				return;
 			
 			DisplayHomeWork(HW);
@@ -895,7 +895,7 @@ public class DisplayMessageActivity extends Activity {
 			if (isCancelled())
 				return;
 
-			if (HW[0] == "请检查网络连接")
+			if (HW[0] == "请检查网络连接...")
 				return;
 			
 			DisplayHomeWork(HW);
@@ -1003,7 +1003,7 @@ public class DisplayMessageActivity extends Activity {
 			// Log.e("DisplayMessageActivity", "E " + e.getMessage());
 		}
 
-		HomeWork[0] = "请检查网络连接1...";
+		HomeWork[0] = "请检查网络连接...";
 		return HomeWork;
 	}
 
