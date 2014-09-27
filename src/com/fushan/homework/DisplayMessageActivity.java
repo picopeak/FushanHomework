@@ -226,7 +226,6 @@ public class DisplayMessageActivity extends Activity {
 			if (arg1 == 1) {
 				Toast SM = Toast.makeText(DisplayMessageActivity.this, "正在登录网络...", 1);
 				SM.show();
-				// ShowMessage("正在登录网络...");
 				// Fetch from database first
 				String HW[];
 				HW = HWDB.getRecords(UserName, getDate(c));
@@ -268,12 +267,6 @@ public class DisplayMessageActivity extends Activity {
 	public class MyOnPageChangeListener implements OnPageChangeListener {
 		@Override
 		public void onPageSelected(int arg0) {
-			/*
-			if (!login) {
-				mPager.setCurrentItem(1, false);
-				return;
-			}
-			*/
 			String[] HW;
 			if (arg0 == 0) {
 				c.add(Calendar.DATE, -1);
@@ -376,9 +369,6 @@ public class DisplayMessageActivity extends Activity {
 		public void onClick(View v) {
 			if (LastTask != null)
 				LastTask.cancel(false);
-			// Toast SM = Toast.makeText(DisplayMessageActivity.this, "正在读取数据...", 1);
-			// SM.show();
-			// ShowMessage("正在读取数据...");
 			LastTask = new LoginGetToDateTask().execute(c);
 		}
 	}
@@ -687,12 +677,6 @@ public class DisplayMessageActivity extends Activity {
 			if (!login) {
 				Toast SM = Toast.makeText(DisplayMessageActivity.this, "请检查网络...", 1);
 				SM.show();
-				/*
-				Intent intent = new Intent();
-				intent.setClass(DisplayMessageActivity.this, MainActivity.class);
-				intent.putExtra("CurrentUser", CurrentUser);
-				startActivityForResult(intent, 0);
-				*/
 			} else {
 				SetCurrentDate(c);
 
@@ -1147,6 +1131,9 @@ public class DisplayMessageActivity extends Activity {
 
 			@Override
 			protected void onPostExecute(Drawable result) {
+				if (result == null) {
+					return;
+				}
 				// set the correct bound according to the result from HTTP call
 				urlDrawable.setBounds(0, 0, 0 + result.getIntrinsicWidth(),
 						0 + result.getIntrinsicHeight());
@@ -1209,7 +1196,16 @@ public class DisplayMessageActivity extends Activity {
 						urlString = "http://www.fushanedu.cn" + urlString;
 						urlString = urlString.replaceAll("/WEBADMIN", "");
 
-						InputStream is = fetch(urlString);
+						InputStream is;
+						try {
+							DefaultHttpClient httpClient = new DefaultHttpClient();
+							HttpGet request = new HttpGet(urlString);
+							HttpResponse response = httpClient.execute(request);
+							is =  response.getEntity().getContent();
+						} catch (Exception e) {
+							return null;
+						}
+						
 						drawable = Drawable.createFromStream(is, "src");
 						if (urlString.contains("emotImages")) {
 							scale = dm.scaledDensity;
@@ -1242,14 +1238,6 @@ public class DisplayMessageActivity extends Activity {
 				} catch (Exception e) {
 					return null;
 				}
-			}
-
-			private InputStream fetch(String urlString)
-					throws MalformedURLException, IOException {
-				DefaultHttpClient httpClient = new DefaultHttpClient();
-				HttpGet request = new HttpGet(urlString);
-				HttpResponse response = httpClient.execute(request);
-				return response.getEntity().getContent();
 			}
 		}
 	}
