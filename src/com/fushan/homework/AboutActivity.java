@@ -46,9 +46,11 @@ public class AboutActivity extends Activity {
         AboutString += "2. 点击日期可以刷新当前日期作业内容。<BR>";       
         AboutString += "3. 可以使用菜单快速切换两个用户。<BR><BR><BR>";
         AboutString += "<h3>福外作业更新介绍:</h3>";
-        AboutString += "v3.4:<BR><BR>";
+        AboutString += "v4.0:<BR><BR>";
         AboutString += "1. 优化网络访问，大幅减少从福山教育网络的数据下载。<BR>";
-        AboutString += "2. 修复点击日期刷新当前日期作业内容的bug。<BR><BR>";
+        AboutString += "2. 支持离线作业显示。<BR>";
+        AboutString += "3. 提升左右滑动显示作业体验。<BR>";
+        AboutString += "4. 修复一些简单的bug。<BR><BR>";
         AboutString += "v3.3:<BR><BR>";
         AboutString += "1. 修复一个不能显示bitmap导致崩溃的bug。<BR><BR>";
         AboutString += "v3.2:<BR><BR>";
