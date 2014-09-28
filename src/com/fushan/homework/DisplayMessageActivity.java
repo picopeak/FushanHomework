@@ -367,6 +367,8 @@ public class DisplayMessageActivity extends Activity {
 
 	class CurrentDate_OnClickListener implements OnClickListener {
 		public void onClick(View v) {
+			Toast SM = Toast.makeText(DisplayMessageActivity.this, "正在读取数据...", 1);
+			SM.show();
 			if (LastTask != null)
 				LastTask.cancel(false);
 			LastTask = new LoginGetToDateTask().execute(c);
@@ -690,12 +692,13 @@ public class DisplayMessageActivity extends Activity {
 				UserName = preference.getString("UserName" + CurrentUser, "");
 				PassWord = preference.getString("PassWord" + CurrentUser, "");
 
-				Toast SM = Toast.makeText(DisplayMessageActivity.this, "正在读取数据...", 1);
-				SM.show();
+				// Toast SM = Toast.makeText(DisplayMessageActivity.this, "正在读取数据...", 1);
+				// SM.show();
 				// ShowMessage("正在读取数据...");
 				if (LastTask != null)
 					LastTask.cancel(false);
-				LastTask = new GetToDateHomeWorkTask().execute(c);
+				GetToDateHomeWorkTaskWithCache(c);
+				// LastTask = new GetToDateHomeWorkTask().execute(c);
 			}
 		}
 	}
