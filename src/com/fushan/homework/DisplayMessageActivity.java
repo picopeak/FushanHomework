@@ -287,9 +287,9 @@ public class DisplayMessageActivity extends Activity {
 		if (HW[0] == null) {
 			String TEMP_HW[] = new String[10];
 			TEMP_HW[0] = "";
-			DisplayHomeWork(TEMP_HW, HomeWorkL);
+			DisplayHomeWork(TEMP_HW, HomeWork);
 		} else {
-			DisplayHomeWork(HW, HomeWorkL);
+			DisplayHomeWork(HW, HomeWork);
 		}
 	}
 	
