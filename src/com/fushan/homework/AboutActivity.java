@@ -43,11 +43,12 @@ public class AboutActivity extends Activity {
         String AboutString = "";
         AboutString += "<h3>福外作业使用指南:</h3>";
         AboutString += "1. 左右滑动可以切换日期。<BR>";       
-        AboutString += "2. 点击日期可以刷新当前日期作业内容。<BR>";       
+        AboutString += "2. 下拉可以刷新当前日期作业内容。<BR>";       
         AboutString += "3. 可以使用菜单快速切换两个用户。<BR><BR><BR>";
         AboutString += "<h3>福外作业更新介绍:</h3>";
         AboutString += "v4.1:<BR><BR>";
-        AboutString += "1. 修复一个离线模式下读取图片失败后导致软件异常退出的bug。<BR><BR>";
+        AboutString += "1. 支持下拉刷新当前日期作业内容。<BR>";
+        AboutString += "2. 修复一个离线模式下读取图片失败后导致软件异常退出的bug。<BR><BR>";
         AboutString += "v4.0:<BR><BR>";
         AboutString += "1. 优化网络访问，大幅减少从福山教育网络的数据下载。<BR>";
         AboutString += "2. 支持离线作业显示。<BR>";

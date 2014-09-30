@@ -39,6 +39,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.markupartist.android.widget.PullToRefreshListView;
+import com.markupartist.android.widget.PullToRefreshListView.OnRefreshListener;
+
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -83,7 +86,7 @@ import android.widget.Toast;
 public class DisplayMessageActivity extends Activity {
 
 	private HttpClient httpclient;
-	private ListView HomeWork, HomeWorkL, HomeWorkR;
+	private PullToRefreshListView HomeWork, HomeWorkL, HomeWorkR;
 	private String UserName = "";
 	private String PassWord = "";
 	private String RealName = "";
@@ -180,14 +183,30 @@ public class DisplayMessageActivity extends Activity {
 		AllViews = new ArrayList<View>();
 
 		LayoutInflater mInflater = getLayoutInflater();
-		View view0 = mInflater.inflate(R.layout.homework_list, null);
-		HomeWorkL = (ListView) view0.findViewById(R.id.HomeWork);
+		View view0 = mInflater.inflate(R.layout.pull_to_refresh, null);
+		HomeWorkL = (PullToRefreshListView) view0.findViewById(R.id.HomeWork);
 		AllViews.add(view0);
-		View view1 = mInflater.inflate(R.layout.homework_list, null);
-		HomeWork = (ListView) view1.findViewById(R.id.HomeWork);
+		View view1 = mInflater.inflate(R.layout.pull_to_refresh, null);
+        HomeWork = (PullToRefreshListView) view1.findViewById(R.id.HomeWork);
 		AllViews.add(view1);
-		View view2 = mInflater.inflate(R.layout.homework_list, null);
-		HomeWorkR = (ListView) view2.findViewById(R.id.HomeWork);
+
+        // Set a listener to be invoked when the list should be refreshed.
+		OnRefreshListener RL = new OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                // Do work to refresh the list here.
+    			// Toast SM = Toast.makeText(DisplayMessageActivity.this, "正在下拉读取数据...", 1);
+    			// SM.show();
+    			if (LastTask != null)
+    				LastTask.cancel(false);
+    			LastTask = new LoginGetToDateTask().execute(c);
+            }
+        };
+
+        HomeWork.setOnRefreshListener(RL);
+
+		View view2 = mInflater.inflate(R.layout.pull_to_refresh, null);
+		HomeWorkR = (PullToRefreshListView) view2.findViewById(R.id.HomeWork);
 		AllViews.add(view2);
 
 		mPager.setAdapter(new MyPagerAdapter(AllViews));
@@ -367,11 +386,6 @@ public class DisplayMessageActivity extends Activity {
 
 	class CurrentDate_OnClickListener implements OnClickListener {
 		public void onClick(View v) {
-			Toast SM = Toast.makeText(DisplayMessageActivity.this, "正在读取数据...", 1);
-			SM.show();
-			if (LastTask != null)
-				LastTask.cancel(false);
-			LastTask = new LoginGetToDateTask().execute(c);
 		}
 	}
 
@@ -697,7 +711,7 @@ public class DisplayMessageActivity extends Activity {
 				// ShowMessage("正在读取数据...");
 				if (LastTask != null)
 					LastTask.cancel(false);
-				GetToDateHomeWorkTaskWithCache(c);
+				GetToDateHomeWorkTaskFromNetwork(c);
 				// LastTask = new GetToDateHomeWorkTask().execute(c);
 			}
 		}
@@ -858,6 +872,7 @@ public class DisplayMessageActivity extends Activity {
 				return;
 			
 			DisplayHomeWork(HW);
+			HomeWork.onRefreshComplete();
 		}
 	}
 
@@ -886,6 +901,20 @@ public class DisplayMessageActivity extends Activity {
 				return;
 			
 			DisplayHomeWork(HW);
+			HomeWork.onRefreshComplete();
+		}
+	}
+
+	private void GetToDateHomeWorkTaskFromNetwork(Calendar c) {
+		// Cancel whatever task we have
+		if (LastTask != null)
+			LastTask.cancel(false);
+
+		if (isToday(c)) {
+			// Log.e("GetToDateHomeWorkTaskWithCache", getDate(c));
+			LastTask = new GetTodayHomeWorkTask().execute(c);
+		} else {
+			LastTask = new GetToDateHomeWorkTask().execute(c);				
 		}
 	}
 
