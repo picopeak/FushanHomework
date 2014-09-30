@@ -175,7 +175,7 @@ public class DisplayMessageActivity extends Activity {
 	private void ShowMessage(String s) {
 		String[] HW = new String[10];
 		HW[0] = s;
-		DisplayHomeWork(HW);
+		DisplayHomeWork(HW, HomeWork);
 	}
 
 	private void InitViewPager() {
@@ -251,9 +251,9 @@ public class DisplayMessageActivity extends Activity {
 				if (HW[0] == null) {
 					String TEMP_HW[] = new String[10];
 					TEMP_HW[0] = "正在读取数据...";
-					DisplayHomeWork(TEMP_HW);
+					DisplayHomeWork(TEMP_HW, HomeWork);
 				} else {
-					DisplayHomeWork(HW);
+					DisplayHomeWork(HW, HomeWork);
 				}
 
 				if (LastTask != null)
@@ -283,6 +283,16 @@ public class DisplayMessageActivity extends Activity {
 		}
 	}
 
+	public void DisplayHomeWorkFromCache(PullToRefreshListView HomeWork, String[] HW) {
+		if (HW[0] == null) {
+			String TEMP_HW[] = new String[10];
+			TEMP_HW[0] = "";
+			DisplayHomeWork(TEMP_HW, HomeWorkL);
+		} else {
+			DisplayHomeWork(HW, HomeWorkL);
+		}
+	}
+	
 	public class MyOnPageChangeListener implements OnPageChangeListener {
 		@Override
 		public void onPageSelected(int arg0) {
@@ -295,32 +305,11 @@ public class DisplayMessageActivity extends Activity {
 
 				// Fetch from database first
 				HW = HWDB.getRecords(UserName, getDate(y));
-				if (HW[0] == null) {
-					String TEMP_HW[] = new String[10];
-					TEMP_HW[0] = "";
-					DisplayHomeWorkL(TEMP_HW);
-				} else {
-					DisplayHomeWorkL(HW);
-				}
-
+				DisplayHomeWorkFromCache(HomeWorkL, HW);
 				HW = HWDB.getRecords(UserName, getDate(t));
-				if (HW[0] == null) {
-					String TEMP_HW[] = new String[10];
-					TEMP_HW[0] = "";
-					DisplayHomeWorkR(TEMP_HW);
-				} else {
-					DisplayHomeWorkR(HW);
-				}
-				
-				// Fetch from database first
+				DisplayHomeWorkFromCache(HomeWorkR, HW);
 				HW = HWDB.getRecords(UserName, getDate(c));
-				if (HW[0] == null) {
-					String TEMP_HW[] = new String[10];
-					TEMP_HW[0] = "正在读取数据...";
-					DisplayHomeWork(TEMP_HW);
-				} else {
-					DisplayHomeWork(HW);
-				}
+				DisplayHomeWorkFromCache(HomeWork, HW);
 				
 				mPager.setCurrentItem(1, false);
 				// Toast SM = Toast.makeText(DisplayMessageActivity.this, "正在读取数据...", 1);
@@ -334,32 +323,11 @@ public class DisplayMessageActivity extends Activity {
 
 				// Fetch from database first
 				HW = HWDB.getRecords(UserName, getDate(y));
-				if (HW[0] == null) {
-					String TEMP_HW[] = new String[10];
-					TEMP_HW[0] = "";
-					DisplayHomeWorkL(TEMP_HW);
-				} else {
-					DisplayHomeWorkL(HW);
-				}
-
+				DisplayHomeWorkFromCache(HomeWorkL, HW);
 				HW = HWDB.getRecords(UserName, getDate(t));
-				if (HW[0] == null) {
-					String TEMP_HW[] = new String[10];
-					TEMP_HW[0] = "";
-					DisplayHomeWorkR(TEMP_HW);
-				} else {
-					DisplayHomeWorkR(HW);
-				}
-
-				// Fetch from database first
+				DisplayHomeWorkFromCache(HomeWorkR, HW);
 				HW = HWDB.getRecords(UserName, getDate(c));
-				if (HW[0] == null) {
-					String TEMP_HW[] = new String[10];
-					TEMP_HW[0] = "正在读取数据...";
-					DisplayHomeWork(TEMP_HW);
-				} else {
-					DisplayHomeWork(HW);
-				}
+				DisplayHomeWorkFromCache(HomeWork, HW);
 				
 				mPager.setCurrentItem(1, false);
 				// Toast SM = Toast.makeText(DisplayMessageActivity.this, "正在读取数据...", 1);
@@ -400,7 +368,7 @@ public class DisplayMessageActivity extends Activity {
 	}
 
 	// Main entry of displaying homework
-	private void DisplayHomeWork(String[] HW) {
+	private void DisplayHomeWork(String[] HW, PullToRefreshListView HomeWork) {
 		MyCustomAdapter adapter = new MyCustomAdapter();
 		boolean findHW = false;
 		for (int i = 0; i < 10; i++) {
@@ -417,46 +385,6 @@ public class DisplayMessageActivity extends Activity {
 			adapter.addItem("今日没有作业", 0);
 		}
 		HomeWork.setAdapter(adapter);
-	}
-
-	// Main entry of displaying homework
-	private void DisplayHomeWorkL(String[] HW) {
-		MyCustomAdapter adapter = new MyCustomAdapter();
-		boolean findHW = false;
-		for (int i = 0; i < 10; i++) {
-			if (HW[i] != null) {
-				findHW = true;
-				// URLImageParser p = new URLImageParser(HomeWork, this);
-				// adapter.addItem(Html.fromHtml(HW[i], p, null));
-				adapter.addItem(HW[i], i);
-			}
-		}
-
-		if (!findHW) {
-			// adapter.addItem(Html.fromHtml("今日没有作业", null, null));
-			adapter.addItem("今日没有作业", 0);
-		}
-		HomeWorkL.setAdapter(adapter);
-	}
-
-	// Main entry of displaying homework
-	private void DisplayHomeWorkR(String[] HW) {
-		MyCustomAdapter adapter = new MyCustomAdapter();
-		boolean findHW = false;
-		for (int i = 0; i < 10; i++) {
-			if (HW[i] != null) {
-				findHW = true;
-				// URLImageParser p = new URLImageParser(HomeWork, this);
-				// adapter.addItem(Html.fromHtml(HW[i], p, null));
-				adapter.addItem(HW[i], i);
-			}
-		}
-
-		if (!findHW) {
-			// adapter.addItem(Html.fromHtml("今日没有作业", null, null));
-			adapter.addItem("今日没有作业", 0);
-		}
-		HomeWorkR.setAdapter(adapter);
 	}
 
 	// ////////////////////////////////////////////////////////
@@ -651,18 +579,18 @@ public class DisplayMessageActivity extends Activity {
 				if (HW[0] == null) {
 					String TEMP_HW[] = new String[10];
 					TEMP_HW[0] = "";
-					DisplayHomeWorkL(TEMP_HW);
+					DisplayHomeWork(TEMP_HW, HomeWorkL);
 				} else {
-					DisplayHomeWorkL(HW);
+					DisplayHomeWork(HW, HomeWorkL);
 				}
 
 				HW = HWDB.getRecords(UserName, getDate(t));
 				if (HW[0] == null) {
 					String TEMP_HW[] = new String[10];
 					TEMP_HW[0] = "";
-					DisplayHomeWorkR(TEMP_HW);
+					DisplayHomeWork(TEMP_HW, HomeWorkR);
 				} else {
-					DisplayHomeWorkR(HW);
+					DisplayHomeWork(HW, HomeWorkR);
 				}
 
 				// Toast SM = Toast.makeText(DisplayMessageActivity.this, "登录成功！正在读取数据...", 1);
@@ -693,6 +621,7 @@ public class DisplayMessageActivity extends Activity {
 			if (!login) {
 				Toast SM = Toast.makeText(DisplayMessageActivity.this, "请检查网络...", 1);
 				SM.show();
+				HomeWork.onRefreshComplete();
 			} else {
 				SetCurrentDate(c);
 
@@ -871,7 +800,7 @@ public class DisplayMessageActivity extends Activity {
 			if (HW[0] == "请检查网络连接...")
 				return;
 			
-			DisplayHomeWork(HW);
+			DisplayHomeWork(HW, HomeWork);
 			HomeWork.onRefreshComplete();
 		}
 	}
@@ -900,7 +829,7 @@ public class DisplayMessageActivity extends Activity {
 			if (HW[0] == "请检查网络连接...")
 				return;
 			
-			DisplayHomeWork(HW);
+			DisplayHomeWork(HW, HomeWork);
 			HomeWork.onRefreshComplete();
 		}
 	}
@@ -939,7 +868,7 @@ public class DisplayMessageActivity extends Activity {
 		// Fetch from database first
 		HW = HWDB.getRecords(UserName, getDate(c));
 		if (HW[0] != null) {
-			DisplayHomeWork(HW);
+			DisplayHomeWork(HW, HomeWork);
 		}
 
 		GetToDateHomeWorkTask(c, HW);
