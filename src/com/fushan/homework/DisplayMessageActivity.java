@@ -286,7 +286,7 @@ public class DisplayMessageActivity extends Activity {
 	public void DisplayHomeWorkFromCache(PullToRefreshListView HomeWork, String[] HW) {
 		if (HW[0] == null) {
 			String TEMP_HW[] = new String[10];
-			TEMP_HW[0] = "";
+			TEMP_HW[0] = "没有本地作业数据!";
 			DisplayHomeWork(TEMP_HW, HomeWork);
 		} else {
 			DisplayHomeWork(HW, HomeWork);
