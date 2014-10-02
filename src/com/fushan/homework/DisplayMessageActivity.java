@@ -1313,11 +1313,19 @@ public class DisplayMessageActivity extends Activity {
 			UserName = preference.getString("UserName" + 1, "");
 			PassWord = preference.getString("PassWord" + 1, "");
 
-			ShowMessage("正在登录网络...");
-			if (LastTask != null)
-				LastTask.cancel(false);
-			LastTask = new LoginTask().execute(c);
-			return true;
+			if (UserName == "") {
+				Intent intent = new Intent();
+				intent.setClass(DisplayMessageActivity.this, MainActivity.class);
+				intent.putExtra("CurrentUser", CurrentUser);
+				startActivityForResult(intent, 0);
+				return true;
+			} else {
+				ShowMessage("正在登录网络...");
+				if (LastTask != null)
+					LastTask.cancel(false);
+				LastTask = new LoginTask().execute(c);
+				return true;
+			}
 		}
 		case R.id.User2: {
 			SharedPreferences preference = getSharedPreferences("person",
@@ -1330,11 +1338,19 @@ public class DisplayMessageActivity extends Activity {
 			UserName = preference.getString("UserName" + 2, "");
 			PassWord = preference.getString("PassWord" + 2, "");
 
-			ShowMessage("正在登录网络...");
-			if (LastTask != null)
-				LastTask.cancel(false);
-			LastTask = new LoginTask().execute(c);
-			return true;
+			if (UserName == "") {
+				Intent intent = new Intent();
+				intent.setClass(DisplayMessageActivity.this, MainActivity.class);
+				intent.putExtra("CurrentUser", CurrentUser);
+				startActivityForResult(intent, 0);
+				return true;
+			} else {
+				ShowMessage("正在登录网络...");
+				if (LastTask != null)
+					LastTask.cancel(false);
+				LastTask = new LoginTask().execute(c);
+				return true;
+			}
 		}
 		case R.id.Fontsize: {
 			bigfont = !bigfont;
