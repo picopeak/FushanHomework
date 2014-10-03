@@ -1005,6 +1005,9 @@ public class DisplayMessageActivity extends Activity {
 			if (bigfont) {
 				fontsize = 24;
 				holder.setTextSize(fontsize);
+			} else {
+				fontsize = 18;
+				holder.setTextSize(fontsize);				
 			}
 
 			URLImageParser imageGetter = new URLImageParser(HomeWork, position);
@@ -1359,7 +1362,7 @@ public class DisplayMessageActivity extends Activity {
 			Editor edit = preference.edit();
 			edit.putBoolean("fontsize", bigfont);
 			edit.commit();
-			HomeWork.invalidate();
+			HomeWork.invalidateViews();
 			return true;
 		}
 		case R.id.About: {
