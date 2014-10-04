@@ -593,11 +593,6 @@ public class DisplayMessageActivity extends Activity {
 					DisplayHomeWork(HW, HomeWorkR);
 				}
 
-				// Toast SM = Toast.makeText(DisplayMessageActivity.this, "登录成功！正在读取数据...", 1);
-				// SM.show();
-				// ShowMessage("登录成功！正在读取数据...");
-				if (LastTask != null)
-					LastTask.cancel(false);
 				GetToDateHomeWorkTaskWithCache(c);
 			}
 		}
@@ -635,13 +630,7 @@ public class DisplayMessageActivity extends Activity {
 				UserName = preference.getString("UserName" + CurrentUser, "");
 				PassWord = preference.getString("PassWord" + CurrentUser, "");
 
-				// Toast SM = Toast.makeText(DisplayMessageActivity.this, "正在读取数据...", 1);
-				// SM.show();
-				// ShowMessage("正在读取数据...");
-				if (LastTask != null)
-					LastTask.cancel(false);
 				GetToDateHomeWorkTaskFromNetwork(c);
-				// LastTask = new GetToDateHomeWorkTask().execute(c);
 			}
 		}
 	}
@@ -800,6 +789,7 @@ public class DisplayMessageActivity extends Activity {
 			if (HW[0] == "请检查网络连接...")
 				return;
 			
+			SetCurrentDate(c);
 			DisplayHomeWork(HW, HomeWork);
 			HomeWork.onRefreshComplete();
 		}
@@ -829,6 +819,7 @@ public class DisplayMessageActivity extends Activity {
 			if (HW[0] == "请检查网络连接...")
 				return;
 			
+			SetCurrentDate(c);
 			DisplayHomeWork(HW, HomeWork);
 			HomeWork.onRefreshComplete();
 		}
@@ -1243,6 +1234,7 @@ public class DisplayMessageActivity extends Activity {
 		c = Calendar.getInstance();
 		SetCurrentDate(c);
 		TextView CurrentDate = (TextView) findViewById(R.id.CurrentDate);
+		CurrentDate.setTextSize(20);
 		CurrentDate.setOnClickListener(listener3);
 
 		// set click lister of buttons
