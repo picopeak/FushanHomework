@@ -312,9 +312,6 @@ public class DisplayMessageActivity extends Activity {
 				DisplayHomeWorkFromCache(HomeWork, HW);
 				
 				mPager.setCurrentItem(1, false);
-				// Toast SM = Toast.makeText(DisplayMessageActivity.this, "正在读取数据...", 1);
-				// SM.show();
-				// ShowMessage("正在读取数据...");
 			} else if (arg0 == 2) {
 				c.add(Calendar.DATE, 1);
 				Calendar y = (Calendar) c.clone(), t = (Calendar) c.clone();
@@ -330,9 +327,6 @@ public class DisplayMessageActivity extends Activity {
 				DisplayHomeWorkFromCache(HomeWork, HW);
 				
 				mPager.setCurrentItem(1, false);
-				// Toast SM = Toast.makeText(DisplayMessageActivity.this, "正在读取数据...", 1);
-				// SM.show();
-				// ShowMessage("正在读取数据...");
 			} else {
 				return;
 			}
@@ -340,6 +334,7 @@ public class DisplayMessageActivity extends Activity {
 				LastTask.cancel(false);
 
 			SetCurrentDate(c);
+			HomeWork.onRefreshComplete();
 			GetToDateHomeWorkTask(c, HW);
 		}
 
