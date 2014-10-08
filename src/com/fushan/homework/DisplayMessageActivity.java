@@ -39,9 +39,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import com.markupartist.android.widget.PullToRefreshListView;
-import com.markupartist.android.widget.PullToRefreshListView.OnRefreshListener;
-
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -58,6 +57,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Parcelable;
 import android.support.v4.app.NavUtils;
 import android.support.v4.view.PagerAdapter;
@@ -83,10 +83,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 @SuppressLint({ "SimpleDateFormat", "DefaultLocale", "ShowToast" })
-public class DisplayMessageActivity extends Activity {
+public class DisplayMessageActivity extends Activity implements OnRefreshListener {
 
 	private HttpClient httpclient;
-	private PullToRefreshListView HomeWork, HomeWorkL, HomeWorkR;
+	private SwipeRefreshLayout swipeLayout;
+	private ListView HomeWork, HomeWorkL, HomeWorkR;
 	private String UserName = "";
 	private String PassWord = "";
 	private String RealName = "";
@@ -178,35 +179,37 @@ public class DisplayMessageActivity extends Activity {
 		DisplayHomeWork(HW, HomeWork);
 	}
 
+    public void onRefresh() {  
+        new Handler().postDelayed(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+            	if (LastTask != null)
+        			LastTask.cancel(false);
+        		LastTask = new LoginGetToDateTask().execute(c);
+            }
+        }, 3000);
+    }
+
 	private void InitViewPager() {
 		mPager = (ViewPager) findViewById(R.id.vPager);
 		AllViews = new ArrayList<View>();
 
 		LayoutInflater mInflater = getLayoutInflater();
-		View view0 = mInflater.inflate(R.layout.pull_to_refresh, null);
-		HomeWorkL = (PullToRefreshListView) view0.findViewById(R.id.HomeWork);
+		View view0 = mInflater.inflate(R.layout.homework_list, null);
+		HomeWorkL = (ListView) view0.findViewById(R.id.HomeWork);
 		AllViews.add(view0);
-		View view1 = mInflater.inflate(R.layout.pull_to_refresh, null);
-        HomeWork = (PullToRefreshListView) view1.findViewById(R.id.HomeWork);
+		View view1 = mInflater.inflate(R.layout.homework_list, null);
+        HomeWork = (ListView) view1.findViewById(R.id.HomeWork);
 		AllViews.add(view1);
-
-        // Set a listener to be invoked when the list should be refreshed.
-		OnRefreshListener RL = new OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                // Do work to refresh the list here.
-    			// Toast SM = Toast.makeText(DisplayMessageActivity.this, "正在下拉读取数据...", 1);
-    			// SM.show();
-    			if (LastTask != null)
-    				LastTask.cancel(false);
-    			LastTask = new LoginGetToDateTask().execute(c);
-            }
-        };
-
-        HomeWork.setOnRefreshListener(RL);
-
-		View view2 = mInflater.inflate(R.layout.pull_to_refresh, null);
-		HomeWorkR = (PullToRefreshListView) view2.findViewById(R.id.HomeWork);
+		
+        swipeLayout = (SwipeRefreshLayout) view1.findViewById(R.id.swipe_refresh);
+        swipeLayout.setOnRefreshListener(this);  
+        swipeLayout.setColorScheme(android.R.color.holo_red_light, android.R.color.holo_green_light, android.R.color.holo_blue_bright, android.R.color.holo_orange_light);  
+		
+		View view2 = mInflater.inflate(R.layout.homework_list, null);
+		HomeWorkR = (ListView) view2.findViewById(R.id.HomeWork);
 		AllViews.add(view2);
 
 		mPager.setAdapter(new MyPagerAdapter(AllViews));
@@ -283,7 +286,7 @@ public class DisplayMessageActivity extends Activity {
 		}
 	}
 
-	public void DisplayHomeWorkFromCache(PullToRefreshListView HomeWork, String[] HW) {
+	public void DisplayHomeWorkFromCache(ListView HomeWork, String[] HW) {
 		if (HW[0] == null) {
 			String TEMP_HW[] = new String[10];
 			TEMP_HW[0] = "没有本地作业数据!";
@@ -334,7 +337,7 @@ public class DisplayMessageActivity extends Activity {
 				LastTask.cancel(false);
 
 			SetCurrentDate(c);
-			HomeWork.onRefreshComplete();
+	    	swipeLayout.setRefreshing(false);
 			GetToDateHomeWorkTask(c, HW);
 		}
 
@@ -363,7 +366,7 @@ public class DisplayMessageActivity extends Activity {
 	}
 
 	// Main entry of displaying homework
-	private void DisplayHomeWork(String[] HW, PullToRefreshListView HomeWork) {
+	private void DisplayHomeWork(String[] HW, ListView HomeWork) {
 		MyCustomAdapter adapter = new MyCustomAdapter();
 		boolean findHW = false;
 		for (int i = 0; i < 10; i++) {
@@ -611,7 +614,7 @@ public class DisplayMessageActivity extends Activity {
 			if (!login) {
 				Toast SM = Toast.makeText(DisplayMessageActivity.this, "请检查网络...", 1);
 				SM.show();
-				HomeWork.onRefreshComplete();
+		    	swipeLayout.setRefreshing(false);
 			} else {
 				SetCurrentDate(c);
 
@@ -786,7 +789,7 @@ public class DisplayMessageActivity extends Activity {
 			
 			SetCurrentDate(c);
 			DisplayHomeWork(HW, HomeWork);
-			HomeWork.onRefreshComplete();
+	    	swipeLayout.setRefreshing(false);
 		}
 	}
 
@@ -816,7 +819,7 @@ public class DisplayMessageActivity extends Activity {
 			
 			SetCurrentDate(c);
 			DisplayHomeWork(HW, HomeWork);
-			HomeWork.onRefreshComplete();
+	    	swipeLayout.setRefreshing(false);
 		}
 	}
 
