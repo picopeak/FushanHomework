@@ -246,8 +246,6 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 			((ViewPager) arg0).addView(view1, 0);
 
 			if (arg1 == 1) {
-				Toast SM = Toast.makeText(DisplayMessageActivity.this, "正在登录网络...", 1);
-				SM.show();
 				// Fetch from database first
 				String HW[];
 				HW = HWDB.getRecords(UserName, getDate(c));
@@ -261,6 +259,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 
 				if (LastTask != null)
 					LastTask.cancel(false);
+		    	swipeLayout.setRefreshing(true);
 				LastTask = new LoginTask().execute(c);
 			}
 
