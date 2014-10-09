@@ -185,9 +185,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
             @Override
             public void run()
             {
-            	if (LastTask != null)
-        			LastTask.cancel(false);
-        		LastTask = new LoginGetToDateTask().execute(c);
+            	GetToDateHomeWorkTaskFromNetwork(c);
             }
         }, 3000);
     }
@@ -591,43 +589,6 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 				}
 
 				GetToDateHomeWorkTaskWithCache(c);
-			}
-		}
-	}
-
-	// Login facility
-	private class LoginGetToDateTask extends AsyncTask<Calendar, Integer, Long> {
-		private Calendar c;
-		
-		protected Long doInBackground(Calendar... parms) {
-			try {
-				c = parms[0];
-				login = Login();
-			} catch (Exception pce) {
-				// Log.e("DisplayMessageActivity", "PCE " + pce.getMessage());
-			}
-			return (long) 1;
-		}
-
-		protected void onPostExecute(Long result) {
-			if (!login) {
-				Toast SM = Toast.makeText(DisplayMessageActivity.this, "请检查网络...", 1);
-				SM.show();
-		    	swipeLayout.setRefreshing(false);
-			} else {
-				SetCurrentDate(c);
-
-				// After login successfully, we update CurrentUser, UserName and
-				// PassWord
-				SharedPreferences preference = getSharedPreferences("person",
-						Context.MODE_PRIVATE);
-				Editor edit = preference.edit();
-				edit.putInt("CurrentUser", CurrentUser);
-				edit.commit();
-				UserName = preference.getString("UserName" + CurrentUser, "");
-				PassWord = preference.getString("PassWord" + CurrentUser, "");
-
-				GetToDateHomeWorkTaskFromNetwork(c);
 			}
 		}
 	}
