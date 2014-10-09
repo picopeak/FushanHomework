@@ -594,9 +594,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 	}
 
 	private String[] GetToDateHomeWork(Calendar c, GetToDateHomeWorkTask t) throws ParseException {
-		// Read from network...
-		
-		// Covert Date. The day after 2000/1/1, e.g. 2013/12/29 is 5111
+		// Convert Date. The day after 2000/1/1, e.g. 2013/12/29 is 5111
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 		Date beginDate = format.parse("2000-01-01");
 		

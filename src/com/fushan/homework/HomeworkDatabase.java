@@ -44,8 +44,8 @@ public class HomeworkDatabase {
 		@Override
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 			// TODO Auto-generated method stub
-//            db.execSQL("DROP TABLE IF EXISTS " + "'" + DATABASE_NAME + "'");
-//            onCreate(db);
+			//            db.execSQL("DROP TABLE IF EXISTS " + "'" + DATABASE_NAME + "'");
+			//            onCreate(db);
 		}
 	}
 
@@ -145,11 +145,6 @@ public class HomeworkDatabase {
 			        HW[i] = cursor.getString(cursor.getColumnIndex(_CONTENT));
 			        i++;
 				}
-				
-//			    for(int i=0; i<cursor.getCount(); i++){
-//			        cursor.move(i);
-//			        HW[i] = cursor.getString(cursor.getColumnIndex(_CONTENT));
-//			    }
 			}
 		} catch (Exception e) {
 			// Log.e("HomeworkDatabase", e.getMessage());
