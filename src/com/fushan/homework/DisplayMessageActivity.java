@@ -255,10 +255,17 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 					DisplayHomeWork(HW, HomeWork);
 				}
 
-				if (LastTask != null)
-					LastTask.cancel(false);
-		    	swipeLayout.setRefreshing(true);
-				LastTask = new LoginTask().execute(c);
+				if (UserName == "") {
+					Intent intent = new Intent();
+					intent.setClass(DisplayMessageActivity.this, MainActivity.class);
+					intent.putExtra("CurrentUser", CurrentUser);
+					startActivityForResult(intent, 0);
+				} else {
+					if (LastTask != null)
+						LastTask.cancel(false);
+			    	swipeLayout.setRefreshing(true);
+					LastTask = new LoginTask().execute(c);
+				}
 			}
 
 			return mListViews.get(arg1);
