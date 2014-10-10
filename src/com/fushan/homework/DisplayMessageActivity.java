@@ -452,8 +452,8 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 	}
 
 	private boolean Login() {
-		// try to login 3 times;
-		for (int i = 0; i < 3; i++) {
+		// try to login 2 times;
+		for (int i = 0; i < 2; i++) {
 			try {
 				ViewState = GetOldViewState("http://www.fushanedu.cn/jxq/jxq_User.aspx");
 
@@ -552,6 +552,8 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 			if (!login) {
 				Toast SM = Toast.makeText(DisplayMessageActivity.this, "请检查网络或账户密码...", 1);
 				SM.show();
+		    	swipeLayout.setRefreshing(false);
+
 				Intent intent = new Intent();
 				intent.setClass(DisplayMessageActivity.this, MainActivity.class);
 				intent.putExtra("CurrentUser", CurrentUser);
@@ -749,12 +751,16 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 			if (isCancelled())
 				return;
 			
-			if (HW[0] == "请检查网络连接...")
+	    	swipeLayout.setRefreshing(false);
+
+	    	if (HW[0] == "请检查网络连接...") {
+				Toast SM = Toast.makeText(DisplayMessageActivity.this, "请检查网络连接...", 1);
+				SM.show();
 				return;
+			}
 			
 			SetCurrentDate(c);
 			DisplayHomeWork(HW, HomeWork);
-	    	swipeLayout.setRefreshing(false);
 		}
 	}
 
@@ -779,12 +785,16 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 			if (isCancelled())
 				return;
 
-			if (HW[0] == "请检查网络连接...")
+	    	swipeLayout.setRefreshing(false);
+
+			if (HW[0] == "请检查网络连接...") {
+				Toast SM = Toast.makeText(DisplayMessageActivity.this, "请检查网络连接...", 1);
+				SM.show();
 				return;
+			}
 			
 			SetCurrentDate(c);
 			DisplayHomeWork(HW, HomeWork);
-	    	swipeLayout.setRefreshing(false);
 		}
 	}
 
