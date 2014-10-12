@@ -1285,9 +1285,9 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 				startActivityForResult(intent, 0);
 				return true;
 			} else {
-				ShowMessage("正在登录网络...");
 				if (LastTask != null)
 					LastTask.cancel(false);
+		    	swipeLayout.setRefreshing(true);
 				LastTask = new LoginTask().execute(c);
 				return true;
 			}
@@ -1310,9 +1310,9 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 				startActivityForResult(intent, 0);
 				return true;
 			} else {
-				ShowMessage("正在登录网络...");
 				if (LastTask != null)
 					LastTask.cancel(false);
+		    	swipeLayout.setRefreshing(true);
 				LastTask = new LoginTask().execute(c);
 				return true;
 			}
