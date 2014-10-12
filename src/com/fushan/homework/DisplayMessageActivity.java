@@ -495,13 +495,11 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 							new InputStreamReader(is, "GB2312"));
 					String line = "";
 					StringBuilder sb = new StringBuilder();
-					boolean success = false;
 					while ((line = reader.readLine()) != null) {
 						if (line.indexOf("对不起，帐号输入错误！") != -1) {
 							httppost.abort();
 							return false;
-						} else if (!success
-								&& line.indexOf("您好！欢迎使用 家校桥 栏目") != -1) {
+						} else if (line.indexOf("您好！欢迎使用") != -1) {
 							Matcher matcher = Pattern.compile("[^>]*\\(")
 									.matcher(line);
 							if (matcher.find()) {
@@ -516,13 +514,12 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 										RealName);
 								edit.commit();
 							}
-							success = true;
-							break;
+							httppost.abort();
+							return true;
 						}
 						sb.append(line);
 					}
 					httppost.abort();
-					return success;
 				}
 			} catch (ClientProtocolException e) {
 				// Log.e("DisplayMessageActivity", "E " + e.getMessage());
@@ -1378,9 +1375,9 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 			PassWord = preference.getString("PassWord" + CurrentUser, "");
 
 			// Try new login
-			ShowMessage("正在登录网络...");
 			if (LastTask != null)
 				LastTask.cancel(false);
+	    	swipeLayout.setRefreshing(true);
 			LastTask = new LoginTask().execute(c);
 			break;
 		case RESULT_CANCELED:
