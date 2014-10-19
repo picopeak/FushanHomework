@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.ref.SoftReference;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
@@ -116,6 +117,9 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 	private ViewPager mPager;
 	private List<View> AllViews;
 
+	private static Map<String,SoftReference<Bitmap>> sImageCache; 
+	private static LoaderImpl ImageLoader;
+	
 	// ////////////////////////////////////////////////////////
 	// Utility functions
 	// ////////////////////////////////////////////////////////
@@ -1121,6 +1125,13 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 						urlString = "http://www.fushanedu.cn" + urlString;
 						urlString = urlString.replaceAll("/WEBADMIN", "");
 
+						Bitmap bitMapImage;
+						bitMapImage = ImageLoader.getBitmapFromMemory(urlString);
+						if (bitMapImage == null) {
+							bitMapImage = ImageLoader.getBitmapFromUrl(urlString, true);
+						}
+						drawable = new BitmapDrawable(bitMapImage);
+/*						
 						InputStream is;
 						try {
 							DefaultHttpClient httpClient = new DefaultHttpClient();
@@ -1132,6 +1143,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 						}
 						
 						drawable = Drawable.createFromStream(is, "src");
+						*/
 						if (urlString.contains("emotImages")) {
 							scale = dm.scaledDensity;
 							drawable.setBounds(
@@ -1140,17 +1152,6 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 									(int) fontsize,
 									(int) (drawable.getIntrinsicHeight()));
 						} else {
-							// drawable.setBounds(0, 0,
-							// drawable.getIntrinsicWidth(),
-							// drawable.getIntrinsicHeight());
-							float scalew = dm.widthPixels
-									/ drawable.getIntrinsicWidth();
-							float scaleh = dm.heightPixels
-									/ drawable.getIntrinsicHeight();
-							if (scalew < scaleh)
-								scale = scalew / 2;
-							else
-								scale = scaleh / 2;
 							scale = 1;
 							drawable.setBounds(0, 0,
 									(int) (drawable.getIntrinsicWidth() * scale),
@@ -1232,6 +1233,12 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		HWDB = new HomeworkDatabase(DisplayMessageActivity.this);
 		HWDB.open();
 
+		sImageCache = new HashMap<String,SoftReference<Bitmap>>();
+		ImageLoader = new LoaderImpl(sImageCache);
+		String defaultDir = getCacheDir().getAbsolutePath();
+		ImageLoader.setCachedDir(defaultDir);
+		ImageLoader.setCache2File(true);
+		
 		// Display homework using page viewer
 		InitViewPager();
 	}
