@@ -615,6 +615,12 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 
 		// Get HomeWork by trying twice
 		String[] HomeWork = new String[10];
+
+		if (!Login()) {
+			HomeWork[0] = "请检查网络连接...";
+			return HomeWork;			
+		}
+		
 		try {
 			for (int i = 0; i < 2; i++) {
 				ViewState = GetOldViewState("http://www.fushanedu.cn/jxq/jxq_User_jtzyck.aspx");
@@ -688,6 +694,11 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 
 	public String[] GetTodayHomeWork(Calendar c, GetTodayHomeWorkTask t) {
 		String[] HomeWork = new String[10];
+
+		if (!Login()) {
+			HomeWork[0] = "请检查网络连接...";
+			return HomeWork;			
+		}
 
 		try {
 			for (int i = 0; i < 2; i++) {
