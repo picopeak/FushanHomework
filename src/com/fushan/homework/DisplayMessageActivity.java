@@ -375,7 +375,6 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 
 	// Main entry of displaying homework
 	private void DisplayHomeWork(String[] HW, ListView HomeWork) {
-		swipeLayout.setRefreshing(false);
 		MyCustomAdapter adapter = new MyCustomAdapter();
 		boolean findHW = false;
 		for (int i = 0; i < 10; i++) {
@@ -817,7 +816,9 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 
 				c = parms[0];
 				// Log.e("GetTodayHomeWorkTask", getDate(c));
+		    	swipeLayout.setRefreshing(true);
 				HW = GetTodayHomeWork(c, this);
+		    	swipeLayout.setRefreshing(false);
 			} catch (Exception pce) {
 				// Log.e("DisplayMessageActivity", "PCE " + pce.getMessage());
 			}
@@ -828,8 +829,6 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 			if (isCancelled())
 				return;
 			
-	    	swipeLayout.setRefreshing(false);
-
 	    	if (HW[0] == "请检查网络连接...") {
 				Toast SM = Toast.makeText(DisplayMessageActivity.this, "请检查网络连接...", 1);
 				SM.show();
@@ -851,7 +850,9 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 					return (long) 1;
 
 				c = parms[0];
+		    	swipeLayout.setRefreshing(true);
 				HW = GetToDateHomeWork(c, this);
+		    	swipeLayout.setRefreshing(false);
 			} catch (Exception pce) {
 				// Log.e("DisplayMessageActivity", "PCE " + pce.getMessage());
 			}
@@ -861,8 +862,6 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		protected void onPostExecute(Long result) {
 			if (isCancelled())
 				return;
-
-	    	swipeLayout.setRefreshing(false);
 
 			if (HW[0] == "请检查网络连接...") {
 				Toast SM = Toast.makeText(DisplayMessageActivity.this, "请检查网络连接...", 1);
