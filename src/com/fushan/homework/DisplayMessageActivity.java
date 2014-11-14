@@ -603,7 +603,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		}
 	}
 
-	private String[] GetToDateHomeWork(Calendar c, GetToDateHomeWorkTask t) throws ParseException {
+	private String[] GetToDateHomeWork(Calendar c, GetHomeworkTask t) throws ParseException {
 		// Convert Date. The day after 2000/1/1, e.g. 2013/12/29 is 5111
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 		Date beginDate = format.parse("2000-01-01");
@@ -622,6 +622,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		}
 		
 		try {
+			boolean try_workaround_once = false;
 			for (int i = 0; i < 2; i++) {
 				ViewState = GetOldViewState("http://www.fushanedu.cn/jxq/jxq_User_jtzyck.aspx");
 
@@ -666,10 +667,31 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 					if (!isToday(c)) {
 						// Write into database
 						if (HomeWork[0] != "今日没有作业") {
-							// Log.e("GetToDateHomeWork", getDate(c));
+							// Check if we really read out homework.
+							boolean HasHomework = false;
+							for (int j=0; j<10; j++) {
+								if (HomeWork[j] != null) {
+									HasHomework = true;
+									break;
+								}
+							}
+							
 							if (t.isCancelled())
 								return HomeWork;
-							HWDB.createRecords(UserName, getDate(c), HomeWork);
+
+							if (HasHomework || (!HasHomework && try_workaround_once)) {
+								HWDB.createRecords(UserName, getDate(c), HomeWork);
+								return HomeWork;
+							} else {
+								// This is probably a workaround, because the fushan network is unstable, and some times
+								// the normal read can return empty although there are some homeworks. So we will try it
+								// again by reading homework yesterday.
+								Calendar yesterday = (Calendar) c.clone();
+								yesterday.add(Calendar.DATE, -1);
+								GetToDateHomeWork(yesterday, t);
+								try_workaround_once = true;
+								continue;
+							}
 						}
 					}
 					
@@ -678,6 +700,10 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 					httppost.abort();
 					if (!Login())
 						break;
+					else {
+						Toast SM = Toast.makeText(DisplayMessageActivity.this, "重新登陆网络成功！", 1);
+						SM.show();						
+					}
 				}
 			}
 		} catch (ClientProtocolException e) {
@@ -692,7 +718,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		return HomeWork;
 	}
 
-	public String[] GetTodayHomeWork(Calendar c, GetTodayHomeWorkTask t) {
+	public String[] GetTodayHomeWork(Calendar c, GetHomeworkTask t) throws ParseException {
 		String[] HomeWork = new String[10];
 
 		if (!Login()) {
@@ -701,6 +727,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		}
 
 		try {
+			boolean try_workaround_once = false;
 			for (int i = 0; i < 2; i++) {
 				HttpGet get = new HttpGet(
 						"http://www.fushanedu.cn/jxq/jxq_User_jtzyck.aspx");
@@ -715,17 +742,41 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 					HomeWork = ReadHomeWork(httpResponse);
 					get.abort();
 					
+					// Check if we really read out homework.
+					boolean HasHomework = false;
+					for (int j=0; j<10; j++) {
+						if (HomeWork[j] != null) {
+							HasHomework = true;
+							break;
+						}
+					}
+					
 					// Write into database
 					if (t.isCancelled())
 						return HomeWork;
-					// Log.e("GetTodayHomeWork", getDate(c));
-					HWDB.createRecords(UserName, getDate(c), HomeWork);
 
-					return HomeWork;
-				} else {
-					get.abort();
-					if (!Login())
-						break;
+					if (HasHomework || (!HasHomework && try_workaround_once)) {
+						HWDB.createRecords(UserName, getDate(c), HomeWork);
+						return HomeWork;
+					} else {
+						// This is probably a workaround, because the fushan network is unstable, and some times
+						// the normal read can return empty although there are some homeworks. So we will try it
+						// again by reading homework yesterday.
+						Calendar yesterday = (Calendar) c.clone();
+						yesterday.add(Calendar.DATE, -1);
+						GetToDateHomeWork(yesterday, t);
+						try_workaround_once = true;
+						continue;
+					}
+				} 
+
+				// If not successful on reading homework, let's try again by logging into fushan network again.
+				get.abort();
+				if (!Login())
+					break;
+				else {
+					Toast SM = Toast.makeText(DisplayMessageActivity.this, "重新登陆网络成功！", 1);
+					SM.show();						
 				}
 			}
 		} catch (ClientProtocolException e) {
@@ -740,8 +791,16 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		return HomeWork;
 	}
 	
+	private class GetHomeworkTask extends AsyncTask<Calendar, Integer, Long> {
+		@Override
+		protected Long doInBackground(Calendar... params) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+	}
+	
 	// Get homework data facility
-	private class GetTodayHomeWorkTask extends AsyncTask<Calendar, Integer, Long> {
+	private class GetTodayHomeWorkTask extends GetHomeworkTask {
 		private String[] HW = new String[10];
 		private Calendar c;
 
@@ -776,7 +835,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		}
 	}
 
-	private class GetToDateHomeWorkTask extends AsyncTask<Calendar, Integer, Long> {
+	private class GetToDateHomeWorkTask extends GetHomeworkTask {
 		private String[] HW = new String[10];
 		private Calendar c;
 

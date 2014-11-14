@@ -46,6 +46,8 @@ public class AboutActivity extends Activity {
         AboutString += "2. 下拉可以刷新当前日期作业内容。<BR>";       
         AboutString += "3. 可以使用菜单快速切换两个用户。<BR><BR><BR>";
         AboutString += "<h3>福外作业更新介绍:</h3>";
+        AboutString += "v4.2:<BR><BR>";
+        AboutString += "1. 修复一个由福山教育网络服务器端的bug导致作业访问异常。如果在家校桥作业的同一日期上连续访问两次，第二次取到的作业是空白，因此导致连续下拉刷新<福外作业>时，显示今日没有作业!<BR><BR>";
         AboutString += "v4.1:<BR><BR>";
         AboutString += "1. 支持下拉刷新当前日期作业内容。<BR>";
         AboutString += "2. 修复一个离线模式下读取图片失败后导致软件异常退出的bug。<BR><BR>";
