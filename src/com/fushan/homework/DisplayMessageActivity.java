@@ -603,7 +603,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		}
 	}
 
-	private String[] GetToDateHomeWork(Calendar c, GetHomeworkTask t) throws ParseException {
+	private String[] GetToDateHomeWork(Calendar c, GetHomeworkTask t, boolean once) throws ParseException {
 		// Convert Date. The day after 2000/1/1, e.g. 2013/12/29 is 5111
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 		Date beginDate = format.parse("2000-01-01");
@@ -664,7 +664,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 					HomeWork = ReadHomeWork(httpResponse);
 					httppost.abort();
 					
-					if (!isToday(c)) {
+					if (!isToday(c) || once) {
 						// Write into database
 						if (HomeWork[0] != "今日没有作业") {
 							// Check if we really read out homework.
@@ -679,7 +679,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 							if (t.isCancelled())
 								return HomeWork;
 
-							if (HasHomework || (!HasHomework && try_workaround_once)) {
+							if (HasHomework || (!HasHomework && try_workaround_once) || once) {
 								HWDB.createRecords(UserName, getDate(c), HomeWork);
 								return HomeWork;
 							} else {
@@ -688,7 +688,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 								// again by reading homework yesterday.
 								Calendar yesterday = (Calendar) c.clone();
 								yesterday.add(Calendar.DATE, -1);
-								GetToDateHomeWork(yesterday, t);
+								GetToDateHomeWork(yesterday, t, true);
 								try_workaround_once = true;
 								continue;
 							}
@@ -700,10 +700,6 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 					httppost.abort();
 					if (!Login())
 						break;
-					else {
-						Toast SM = Toast.makeText(DisplayMessageActivity.this, "重新登陆网络成功！", 1);
-						SM.show();						
-					}
 				}
 			}
 		} catch (ClientProtocolException e) {
@@ -764,7 +760,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 						// again by reading homework yesterday.
 						Calendar yesterday = (Calendar) c.clone();
 						yesterday.add(Calendar.DATE, -1);
-						GetToDateHomeWork(yesterday, t);
+						GetToDateHomeWork(yesterday, t, true);
 						try_workaround_once = true;
 						continue;
 					}
@@ -774,10 +770,6 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 				get.abort();
 				if (!Login())
 					break;
-				else {
-					Toast SM = Toast.makeText(DisplayMessageActivity.this, "重新登陆网络成功！", 1);
-					SM.show();						
-				}
 			}
 		} catch (ClientProtocolException e) {
 			// HomeWork[0] = e.toString();
@@ -800,6 +792,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 
         @Override
         protected void onCancelled() {
+	    	swipeLayout.setRefreshing(false);
             super.onCancelled();
         }
 	}
@@ -851,7 +844,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 
 				c = parms[0];
 		    	swipeLayout.setRefreshing(true);
-				HW = GetToDateHomeWork(c, this);
+				HW = GetToDateHomeWork(c, this, false);
 		    	swipeLayout.setRefreshing(false);
 			} catch (Exception pce) {
 				// Log.e("DisplayMessageActivity", "PCE " + pce.getMessage());
