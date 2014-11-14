@@ -189,7 +189,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
             @Override
             public void run()
             {
-            	GetToDateHomeWorkTaskFromNetwork(c);
+        		GetToDateHomeWorkTaskFromNetwork(c);
             }
         }, 3000);
     }
@@ -375,6 +375,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 
 	// Main entry of displaying homework
 	private void DisplayHomeWork(String[] HW, ListView HomeWork) {
+		swipeLayout.setRefreshing(false);
 		MyCustomAdapter adapter = new MyCustomAdapter();
 		boolean findHW = false;
 		for (int i = 0; i < 10; i++) {
@@ -797,6 +798,11 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 			// TODO Auto-generated method stub
 			return null;
 		}
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+        }
 	}
 	
 	// Get homework data facility
@@ -875,7 +881,6 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 			LastTask.cancel(false);
 
 		if (isToday(c)) {
-			// Log.e("GetToDateHomeWorkTaskWithCache", getDate(c));
 			LastTask = new GetTodayHomeWorkTask().execute(c);
 		} else {
 			LastTask = new GetToDateHomeWorkTask().execute(c);				
