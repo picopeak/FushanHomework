@@ -866,7 +866,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		}
 	}
 
-	// We won't update today again in 1 minute
+	// We won't update today in limited time
 	private boolean EnoughTimePassed()
 	{
 		// We won't update today again in 5 minutes
@@ -878,7 +878,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 			long diff = d1.getTime() - d2.getTime();
 			long diffSeconds = diff / 1000 % 60;
 			
-			if (diffSeconds < 60) {
+			if (diffSeconds < 15) {
 				return false;
 			}
 			return true;
