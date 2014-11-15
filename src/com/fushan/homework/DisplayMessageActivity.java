@@ -66,6 +66,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.Html;
 import android.text.Html.ImageGetter;
+import android.text.format.Time;
 import android.text.method.LinkMovementMethod;
 import android.util.Base64;
 import android.util.DisplayMetrics;
@@ -99,6 +100,8 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 
 	// The date to display homework
 	private Calendar c;
+	private Calendar LastTodayUpdate;
+	private Calendar LastRefresh;
 	
 	private HomeworkDatabase HWDB;
 	
@@ -189,7 +192,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
             @Override
             public void run()
             {
-        		GetToDateHomeWorkTaskFromNetwork(c);
+        		GetToDateHomeWorkTaskFromNetwork(c, true);
             }
         }, 3000);
     }
@@ -346,7 +349,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 
 			SetCurrentDate(c);
 	    	swipeLayout.setRefreshing(false);
-			GetToDateHomeWorkTask(c, HW);
+			GetToDateHomeWorkTaskFromNetwork(c, (HW[0]==null));
 		}
 
 		@Override
@@ -664,38 +667,30 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 					HomeWork = ReadHomeWork(httpResponse);
 					httppost.abort();
 					
-					if (!isToday(c) || once) {
-						// Write into database
-						if (HomeWork[0] != "今日没有作业") {
-							// Check if we really read out homework.
-							boolean HasHomework = false;
-							for (int j=0; j<10; j++) {
-								if (HomeWork[j] != null) {
-									HasHomework = true;
-									break;
-								}
-							}
-							
-							if (t.isCancelled())
-								return HomeWork;
-
-							if (HasHomework || (!HasHomework && try_workaround_once) || once) {
-								HWDB.createRecords(UserName, getDate(c), HomeWork);
-								return HomeWork;
-							} else {
-								// This is probably a workaround, because the fushan network is unstable, and some times
-								// the normal read can return empty although there are some homeworks. So we will try it
-								// again by reading homework yesterday.
-								Calendar yesterday = (Calendar) c.clone();
-								yesterday.add(Calendar.DATE, -1);
-								GetToDateHomeWork(yesterday, t, true);
-								try_workaround_once = true;
-								continue;
-							}
+					boolean HasHomework = false;
+					for (int j=0; j<10; j++) {
+						if (HomeWork[j] != null) {
+							HasHomework = true;
+							break;
 						}
 					}
 					
-					return HomeWork;
+					if (t.isCancelled())
+						return HomeWork;
+
+					if (HasHomework || (!HasHomework && try_workaround_once) || once) {
+						HWDB.createRecords(UserName, getDate(c), HomeWork);
+						return HomeWork;
+					} else {
+						// This is probably a workaround, because the fushan network is unstable, and some times
+						// the normal read can return empty although there are some homeworks. So we will try it
+						// again by reading homework yesterday.
+						Calendar yesterday = (Calendar) c.clone();
+						yesterday.add(Calendar.DATE, -1);
+						GetToDateHomeWork(yesterday, t, true);
+						try_workaround_once = true;
+						continue;
+					}
 				} else {
 					httppost.abort();
 					if (!Login())
@@ -753,6 +748,10 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 
 					if (HasHomework || (!HasHomework && try_workaround_once)) {
 						HWDB.createRecords(UserName, getDate(c), HomeWork);
+						
+						// Update current time
+						LastTodayUpdate = Calendar.getInstance(); 
+						
 						return HomeWork;
 					} else {
 						// This is probably a workaround, because the fushan network is unstable, and some times
@@ -867,30 +866,42 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		}
 	}
 
-	private void GetToDateHomeWorkTaskFromNetwork(Calendar c) {
-		// Cancel whatever task we have
-		if (LastTask != null)
-			LastTask.cancel(false);
+	// We won't update today again in 1 minute
+	private boolean EnoughTimePassed()
+	{
+		// We won't update today again in 5 minutes
+		Calendar now = Calendar.getInstance();
+		Date d1 = now.getTime();
 
-		if (isToday(c)) {
-			LastTask = new GetTodayHomeWorkTask().execute(c);
-		} else {
-			LastTask = new GetToDateHomeWorkTask().execute(c);				
-		}
-	}
-
-	private void GetToDateHomeWorkTask(Calendar c, String HW[]) {
-		// Cancel whatever task we have
-		if (LastTask != null)
-			LastTask.cancel(false);
-
-		if (isToday(c)) {
-			// Log.e("GetToDateHomeWorkTaskWithCache", getDate(c));
-			LastTask = new GetTodayHomeWorkTask().execute(c);
-		} else {
-			if (HW[0] == null) {
-				LastTask = new GetToDateHomeWorkTask().execute(c);				
+		if (LastTodayUpdate != null) {
+			Date d2 = LastTodayUpdate.getTime();
+			long diff = d1.getTime() - d2.getTime();
+			long diffSeconds = diff / 1000 % 60;
+			
+			if (diffSeconds < 60) {
+				return false;
 			}
+			return true;
+		}
+		
+		return true;
+	}
+	
+	private void GetToDateHomeWorkTaskFromNetwork(Calendar c, boolean HomeworkEmpty) {
+		// Cancel whatever task we have
+		if (LastTask != null)
+			LastTask.cancel(false);
+
+		if (isToday(c)) {
+			if (!EnoughTimePassed()) {
+		    	swipeLayout.setRefreshing(false);
+				return;
+			}
+			
+			LastTask = new GetTodayHomeWorkTask().execute(c);
+		} else {
+			if (HomeworkEmpty)
+				LastTask = new GetToDateHomeWorkTask().execute(c);				
 		}
 	}
 
@@ -903,7 +914,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 			DisplayHomeWork(HW, HomeWork);
 		}
 
-		GetToDateHomeWorkTask(c, HW);
+		GetToDateHomeWorkTaskFromNetwork(c, (HW[0]==null));
 	}
 
 	// This method is to parse home work html string
@@ -1269,7 +1280,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		httpclient = new DefaultHttpClient(cm, params);
 
 		// create calendar
-		c = Calendar.getInstance();
+		LastTodayUpdate = c = Calendar.getInstance();
 		SetCurrentDate(c);
 		TextView CurrentDate = (TextView) findViewById(R.id.CurrentDate);
 		CurrentDate.setTextSize(20);
