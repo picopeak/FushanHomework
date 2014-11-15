@@ -878,7 +878,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 			long diff = d1.getTime() - d2.getTime();
 			long diffSeconds = diff / 1000 % 60;
 			
-			if (diffSeconds < 15) {
+			if (diffSeconds < 30) {
 				return false;
 			}
 			return true;
