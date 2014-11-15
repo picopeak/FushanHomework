@@ -344,8 +344,6 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 			} else {
 				return;
 			}
-			if (LastTask != null)
-				LastTask.cancel(false);
 
 			SetCurrentDate(c);
 	    	swipeLayout.setRefreshing(false);
