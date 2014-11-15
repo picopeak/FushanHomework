@@ -1280,7 +1280,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		httpclient = new DefaultHttpClient(cm, params);
 
 		// create calendar
-		LastTodayUpdate = c = Calendar.getInstance();
+		c = Calendar.getInstance();
 		SetCurrentDate(c);
 		TextView CurrentDate = (TextView) findViewById(R.id.CurrentDate);
 		CurrentDate.setTextSize(20);
