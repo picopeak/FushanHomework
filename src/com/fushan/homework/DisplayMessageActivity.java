@@ -777,7 +777,6 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 
         @Override
         protected void onCancelled() {
-	    	swipeLayout.setRefreshing(false);
             super.onCancelled();
         }
 	}
