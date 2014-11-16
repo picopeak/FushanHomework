@@ -99,6 +99,8 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 	private Calendar c;
 	private Calendar LastTodayUpdate;
 	private HomeworkDatabase HWDB;
+	private boolean FirstLaunch;
+	private String LastDate;
 	
 	private boolean login;
 	// private String ViewState =
@@ -665,8 +667,9 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 						}
 					}
 					
-					if (HasHomework || (!HasHomework && try_workaround_once) || once) {
+					if (HasHomework || (!HasHomework && try_workaround_once) || once || !LastDate.equals(getDate(c))) {
 						HWDB.createRecords(UserName, getDate(c), HomeWork);
+						LastDate = getDate(c);
 						return HomeWork;
 					} else {
 						// This is probably a workaround, because the fushan network is unstable, and some times
@@ -733,12 +736,14 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 						}
 					}
 					
-					if (HasHomework || (!HasHomework && try_workaround_once)) {
+					if (HasHomework || (!HasHomework && try_workaround_once) || FirstLaunch  || !LastDate.equals(getDate(c))) {
 						HWDB.createRecords(UserName, getDate(c), HomeWork);
 						
 						// Update current time
-						LastTodayUpdate = Calendar.getInstance(); 
+						LastTodayUpdate = Calendar.getInstance();
+						LastDate = getDate(c);
 						
+						FirstLaunch = false;
 						return HomeWork;
 					} else {
 						// This is probably a workaround, because the fushan network is unstable, and some times
@@ -1283,6 +1288,10 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		TextView CurrentDate = (TextView) findViewById(R.id.CurrentDate);
 		CurrentDate.setTextSize(20);
 		CurrentDate.setOnClickListener(listener3);
+		LastDate="";
+		
+		// Mark it is just launched
+		FirstLaunch = true;
 
 		// set click lister of buttons
 		Button LeftArrow = (Button) findViewById(R.id.LeftArrow);
