@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.ref.SoftReference;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -66,7 +64,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.Html;
 import android.text.Html.ImageGetter;
-import android.text.format.Time;
 import android.text.method.LinkMovementMethod;
 import android.util.Base64;
 import android.util.DisplayMetrics;
@@ -84,7 +81,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-@SuppressLint({ "SimpleDateFormat", "DefaultLocale", "ShowToast" })
+@SuppressLint({ "SimpleDateFormat", "DefaultLocale", "ShowToast", "InlinedApi" })
 public class DisplayMessageActivity extends Activity implements OnRefreshListener {
 
 	private HttpClient httpclient;
@@ -101,8 +98,6 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 	// The date to display homework
 	private Calendar c;
 	private Calendar LastTodayUpdate;
-	private Calendar LastRefresh;
-	
 	private HomeworkDatabase HWDB;
 	
 	private boolean login;
@@ -180,13 +175,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		CurrentDate.setBackgroundColor(Color.parseColor("#9D61AB"));
 	}
 
-	private void ShowMessage(String s) {
-		String[] HW = new String[10];
-		HW[0] = s;
-		DisplayHomeWork(HW, HomeWork);
-	}
-
-    public void onRefresh() {  
+	public void onRefresh() {  
         new Handler().postDelayed(new Runnable()
         {
             @Override
@@ -268,8 +257,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 					intent.putExtra("CurrentUser", CurrentUser);
 					startActivityForResult(intent, 0);
 				} else {
-					if (LastTask != null)
-						LastTask.cancel(false);
+					CancelLastTask();
 			    	swipeLayout.setRefreshing(true);
 					LastTask = new LoginTask().execute(c);
 				}
@@ -655,12 +643,16 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 				nameValuePairs.add(new BasicNameValuePair("ClassName", "1990"));
 				httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs,
 						"GB2312"));
+				if (t.isCancelled()) {
+					httppost.abort();					
+					return HomeWork;
+				}
 				httpResponse = httpclient.execute(httppost);
-				if (t.isCancelled())
+				if (t.isCancelled()) {
+					httppost.abort();					
 					return HomeWork;
+				}
 				int SC = httpResponse.getStatusLine().getStatusCode();
-				if (t.isCancelled())
-					return HomeWork;
 				if (SC == 200) {
 					HomeWork = ReadHomeWork(httpResponse);
 					httppost.abort();
@@ -673,9 +665,6 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 						}
 					}
 					
-					if (t.isCancelled())
-						return HomeWork;
-
 					if (HasHomework || (!HasHomework && try_workaround_once) || once) {
 						HWDB.createRecords(UserName, getDate(c), HomeWork);
 						return HomeWork;
@@ -721,12 +710,16 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 				HttpGet get = new HttpGet(
 						"http://www.fushanedu.cn/jxq/jxq_User_jtzyck.aspx");
 				HttpResponse httpResponse = null;
+				if (t.isCancelled()) {
+					get.abort();					
+					return HomeWork;
+				}
 				httpResponse = httpclient.execute(get);
-				if (t.isCancelled())
+				if (t.isCancelled()) {
+					get.abort();					
 					return HomeWork;
+				}
 				int SC = httpResponse.getStatusLine().getStatusCode();
-				if (t.isCancelled())
-					return HomeWork;
 				if (SC == 200) {
 					HomeWork = ReadHomeWork(httpResponse);
 					get.abort();
@@ -740,10 +733,6 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 						}
 					}
 					
-					// Write into database
-					if (t.isCancelled())
-						return HomeWork;
-
 					if (HasHomework || (!HasHomework && try_workaround_once)) {
 						HWDB.createRecords(UserName, getDate(c), HomeWork);
 						
@@ -783,7 +772,6 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 	private class GetHomeworkTask extends AsyncTask<Calendar, Integer, Long> {
 		@Override
 		protected Long doInBackground(Calendar... params) {
-			// TODO Auto-generated method stub
 			return null;
 		}
 
@@ -802,21 +790,22 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		protected Long doInBackground(Calendar... parms) {
 			try {
 				if (isCancelled())
-					return (long) 1;
+					return (long) 0;
 
 				c = parms[0];
 				// Log.e("GetTodayHomeWorkTask", getDate(c));
 		    	swipeLayout.setRefreshing(true);
 				HW = GetTodayHomeWork(c, this);
 		    	swipeLayout.setRefreshing(false);
+				return (long) 1;
 			} catch (Exception pce) {
 				// Log.e("DisplayMessageActivity", "PCE " + pce.getMessage());
 			}
-			return (long) 1;
+			return (long) 0;
 		}
 
 		protected void onPostExecute(Long result) {
-			if (isCancelled())
+			if (result == 0)
 				return;
 			
 	    	if (HW[0] == "请检查网络连接...") {
@@ -825,6 +814,9 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 				return;
 			}
 			
+			if (isCancelled())
+				return;
+
 			SetCurrentDate(c);
 			DisplayHomeWork(HW, HomeWork);
 		}
@@ -837,20 +829,21 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		protected Long doInBackground(Calendar... parms) {
 			try {
 				if (isCancelled())
-					return (long) 1;
+					return (long) 0;
 
 				c = parms[0];
 		    	swipeLayout.setRefreshing(true);
 				HW = GetToDateHomeWork(c, this, false);
 		    	swipeLayout.setRefreshing(false);
+				return (long) 1;
 			} catch (Exception pce) {
 				// Log.e("DisplayMessageActivity", "PCE " + pce.getMessage());
 			}
-			return (long) 1;
+			return (long) 0;
 		}
 
 		protected void onPostExecute(Long result) {
-			if (isCancelled())
+			if (result == 0)
 				return;
 
 			if (HW[0] == "请检查网络连接...") {
@@ -859,6 +852,9 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 				return;
 			}
 			
+			if (isCancelled())
+				return;
+
 			SetCurrentDate(c);
 			DisplayHomeWork(HW, HomeWork);
 		}
@@ -876,7 +872,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 			long diff = d1.getTime() - d2.getTime();
 			long diffSeconds = diff / 1000 % 60;
 			
-			if (diffSeconds < 30) {
+			if (diffSeconds < 60) {
 				return false;
 			}
 			return true;
@@ -884,12 +880,17 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		
 		return true;
 	}
+
+	private void CancelLastTask() {
+		if (LastTask != null && LastTask.getStatus()==AsyncTask.Status.RUNNING) {
+			LastTask.cancel(true);
+			LastTask = null;
+		}		
+	}
 	
 	private void GetToDateHomeWorkTaskFromNetwork(Calendar c, boolean HomeworkEmpty) {
-		// Cancel whatever task we have
-		if (LastTask != null)
-			LastTask.cancel(false);
-
+		CancelLastTask();
+		
 		if (isToday(c)) {
 			if (!EnoughTimePassed()) {
 		    	swipeLayout.setRefreshing(false);
@@ -1368,8 +1369,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 				startActivityForResult(intent, 0);
 				return true;
 			} else {
-				if (LastTask != null)
-					LastTask.cancel(false);
+				CancelLastTask();
 		    	swipeLayout.setRefreshing(true);
 				LastTask = new LoginTask().execute(c);
 				return true;
@@ -1393,8 +1393,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 				startActivityForResult(intent, 0);
 				return true;
 			} else {
-				if (LastTask != null)
-					LastTask.cancel(false);
+				CancelLastTask();
 		    	swipeLayout.setRefreshing(true);
 				LastTask = new LoginTask().execute(c);
 				return true;
@@ -1458,8 +1457,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 			PassWord = preference.getString("PassWord" + CurrentUser, "");
 
 			// Try new login
-			if (LastTask != null)
-				LastTask.cancel(false);
+			CancelLastTask();
 	    	swipeLayout.setRefreshing(true);
 			LastTask = new LoginTask().execute(c);
 			break;
