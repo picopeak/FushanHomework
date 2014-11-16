@@ -667,9 +667,10 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 						}
 					}
 					
-					if (HasHomework || (!HasHomework && try_workaround_once) || once || !LastDate.equals(getDate(c))) {
-						HWDB.createRecords(UserName, getDate(c), HomeWork);
-						LastDate = getDate(c);
+					String d = getDate(c);
+					if (HasHomework || (!HasHomework && try_workaround_once) || once || !LastDate.equals(d)) {
+						HWDB.createRecords(UserName, d, HomeWork);
+						LastDate = d;
 						return HomeWork;
 					} else {
 						// This is probably a workaround, because the fushan network is unstable, and some times
@@ -736,12 +737,13 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 						}
 					}
 					
-					if (HasHomework || (!HasHomework && try_workaround_once) || FirstLaunch  || !LastDate.equals(getDate(c))) {
-						HWDB.createRecords(UserName, getDate(c), HomeWork);
+					String d = getDate(c);
+					if (HasHomework || (!HasHomework && try_workaround_once) || FirstLaunch  || !LastDate.equals(d)) {
+						HWDB.createRecords(UserName, d, HomeWork);
 						
 						// Update current time
 						LastTodayUpdate = Calendar.getInstance();
-						LastDate = getDate(c);
+						LastDate = d;
 						
 						FirstLaunch = false;
 						return HomeWork;
