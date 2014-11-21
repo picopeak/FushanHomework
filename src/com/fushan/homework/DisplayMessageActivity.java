@@ -97,7 +97,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 
 	// The date to display homework
 	private Calendar c;
-	private Calendar LastTodayUpdate;
+	private Date LastTodayUpdate;
 	private HomeworkDatabase HWDB;
 	private boolean FirstLaunch;
 	private String LastDate;
@@ -742,7 +742,8 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 						HWDB.createRecords(UserName, d, HomeWork);
 						
 						// Update current time
-						LastTodayUpdate = Calendar.getInstance();
+						LastTodayUpdate = Calendar.getInstance().getTime();
+
 						LastDate = d;
 						
 						FirstLaunch = false;
@@ -874,9 +875,9 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		Date d1 = now.getTime();
 
 		if (LastTodayUpdate != null) {
-			Date d2 = LastTodayUpdate.getTime();
+			Date d2 = LastTodayUpdate;
 			long diff = d1.getTime() - d2.getTime();
-			long diffSeconds = diff / 1000 % 60;
+			long diffSeconds = diff / 1000;
 			
 			if (diffSeconds < 60) {
 				return false;
@@ -1291,6 +1292,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		CurrentDate.setTextSize(20);
 		CurrentDate.setOnClickListener(listener3);
 		LastDate="";
+		LastTodayUpdate=null;
 		
 		// Mark it is just launched
 		FirstLaunch = true;
