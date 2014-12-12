@@ -7,24 +7,10 @@ import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.text.method.ScrollingMovementMethod;
 import android.view.Menu;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class AboutActivity extends Activity {
-
-    private Login_OnClickListener listener1 = new Login_OnClickListener();  
-
-    class Login_OnClickListener implements OnClickListener  
-    {  
-        public void onClick(View v)  
-        {  
-            finish();
-        }  
-    }  
-    
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -33,10 +19,6 @@ public class AboutActivity extends Activity {
 		RelativeLayout bg = (RelativeLayout) findViewById(R.id.aboutFushan);
         bg.setBackgroundColor(Color.parseColor("#F5F5DC"));
 
-        // Set button listener
-        Button Login = (Button)findViewById(R.id.back);  
-        Login.setOnClickListener(listener1);
-        
         TextView Description = (TextView)findViewById(R.id.Description);
         Description.setMovementMethod(ScrollingMovementMethod.getInstance()); 
         Description.setMovementMethod(LinkMovementMethod.getInstance());
@@ -46,6 +28,8 @@ public class AboutActivity extends Activity {
         AboutString += "2. 下拉可以刷新当前日期作业内容。<BR>";       
         AboutString += "3. 可以使用菜单快速切换两个用户。<BR><BR><BR>";
         AboutString += "<h3>福外作业更新介绍:</h3>";
+        AboutString += "v4.3:<BR><BR>";
+        AboutString += "1. 增加查询成绩功能。<BR><BR>";
         AboutString += "v4.2:<BR><BR>";
         AboutString += "1. 修复一个由福山教育网络服务器端的bug导致作业访问异常。如果在家校桥作业的同一日期上连续访问两次，第二次取到的作业是空白，因此导致连续下拉刷新<福外作业>时，显示今日没有作业!<BR>";
         AboutString += "2. 修复一个彩虹刷新条永久显示的问题!<BR><BR>";

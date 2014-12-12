@@ -84,7 +84,7 @@ import android.widget.Toast;
 @SuppressLint({ "SimpleDateFormat", "DefaultLocale", "ShowToast", "InlinedApi" })
 public class DisplayMessageActivity extends Activity implements OnRefreshListener {
 
-	private HttpClient httpclient;
+	public static HttpClient httpclient;
 	private SwipeRefreshLayout swipeLayout;
 	private ListView HomeWork, HomeWorkL, HomeWorkR;
 	private String UserName = "";
@@ -102,7 +102,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 	private boolean FirstLaunch;
 	private String LastDate;
 	
-	private boolean login;
+	public static boolean login;
 	// private String ViewState =
 	// "dDwtMTIwMjU0ODg5NDs7bDxsb2dpbjpidG5sb2dpbjs+PirAF7I2CPvB/hrCXAPxCiCha+tS";
 	private String ViewState = "";
@@ -201,7 +201,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		AllViews.add(view1);
 		
         swipeLayout = (SwipeRefreshLayout) view1.findViewById(R.id.swipe_refresh);
-        swipeLayout.setOnRefreshListener(this);  
+        swipeLayout.setOnRefreshListener(this);
         swipeLayout.setColorScheme(android.R.color.holo_red_light, android.R.color.holo_green_light, android.R.color.holo_blue_bright, android.R.color.holo_orange_light);  
 		
 		View view2 = mInflater.inflate(R.layout.homework_list, null);
@@ -388,7 +388,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 	// The followings are login facility
 	// ////////////////////////////////////////////////////////
 
-	private String getInputProperty(String input, String property) {
+	private static String getInputProperty(String input, String property) {
 		Matcher m = Pattern.compile(property + "[\\s]*=[\\s]*\"[^\"]*\"")
 				.matcher(input);
 		if (m.find()) {
@@ -398,7 +398,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		return null;
 	}
 
-	private Map<String, String> getAllInputNames(String body) {
+	private static Map<String, String> getAllInputNames(String body) {
 		Map<String, String> parameters = new HashMap<String, String>();
 		Matcher matcher = Pattern.compile("<input[^<]*>").matcher(body);
 		while (matcher.find()) {
@@ -411,7 +411,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		return parameters;
 	}
 
-	private String GetOldViewState(String url) {
+	public static String GetOldViewState(String url) {
 		String vs = "";
 		// Get view state
 		try {
@@ -542,7 +542,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 
 		protected void onPostExecute(Long result) {
 			if (!login) {
-				Toast SM = Toast.makeText(DisplayMessageActivity.this, "请检查网络或账户密码...", 1);
+				Toast SM = Toast.makeText(DisplayMessageActivity.this, "请检查网络或账户密码...", Toast.LENGTH_SHORT);
 				SM.show();
 		    	swipeLayout.setRefreshing(false);
 
@@ -777,7 +777,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		return HomeWork;
 	}
 	
-	private class GetHomeworkTask extends AsyncTask<Calendar, Integer, Long> {
+	public class GetHomeworkTask extends AsyncTask<Calendar, Integer, Long> {
 		@Override
 		protected Long doInBackground(Calendar... params) {
 			return null;
@@ -816,7 +816,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 				return;
 			
 	    	if (HW[0] == "请检查网络连接...") {
-				Toast SM = Toast.makeText(DisplayMessageActivity.this, "请检查网络连接...", 1);
+				Toast SM = Toast.makeText(DisplayMessageActivity.this, "请检查网络连接...", Toast.LENGTH_SHORT);
 				SM.show();
 				return;
 			}
@@ -854,7 +854,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 				return;
 
 			if (HW[0] == "请检查网络连接...") {
-				Toast SM = Toast.makeText(DisplayMessageActivity.this, "请检查网络连接...", 1);
+				Toast SM = Toast.makeText(DisplayMessageActivity.this, "请检查网络连接...", Toast.LENGTH_SHORT);
 				SM.show();
 				return;
 			}
@@ -879,7 +879,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 			long diff = d1.getTime() - d2.getTime();
 			long diffSeconds = diff / 1000;
 			
-			if (diffSeconds < 60) {
+			if (diffSeconds < 300) {
 				return false;
 			}
 			return true;
@@ -1411,6 +1411,12 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 				return true;
 			}
 		}
+		case R.id.Score: {
+			Intent intent = new Intent();
+			intent.setClass(DisplayMessageActivity.this, ScoreMark.class);
+			startActivity(intent);
+			return true;
+		}
 		case R.id.Fontsize: {
 			bigfont = !bigfont;
 			SharedPreferences preference = getSharedPreferences("person",
@@ -1450,6 +1456,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 				+ ")" + Mark1);
 		menu.add(Menu.NONE, R.id.User2, Menu.NONE, UserName2 + "(" + RealName2
 				+ ")" + Mark2);
+		menu.add(Menu.NONE, R.id.Score, Menu.NONE, "成绩");
 		menu.add(Menu.NONE, R.id.Fontsize, Menu.NONE, bigfont ? "小字体" : "大字体");
 		menu.add(Menu.NONE, R.id.About, Menu.NONE, "关于");
 		return true;

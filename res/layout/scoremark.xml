@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ScoreMarkItem"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <TextView
+        android:id="@+id/CourseName"
+        android:layout_width="40dp"
+	    android:textSize="18sp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+	/>
+
+    <TextView
+        android:id="@+id/CourseGrade"
+        android:layout_width="40dp"
+	    android:textSize="18sp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/CourseName"
+	/>
+    
+    <TextView
+        android:id="@+id/CourseTerm"
+        android:layout_width="40dp"
+	    android:textSize="18sp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/CourseGrade"
+	/>
+    
+    <TextView
+        android:id="@+id/CourseScore"
+        android:layout_width="50dp"
+	    android:textSize="18sp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/CourseTerm"
+	/>
+    
+    <TextView
+        android:id="@+id/CourseScoreTop"
+        android:layout_width="50dp"
+	    android:textSize="18sp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/CourseScore"
+	/>
+
+    <TextView
+        android:id="@+id/CourseScoreAverage"
+        android:layout_width="60dp"
+	    android:textSize="18sp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/CourseScoreTop"
+	/>
+    
+    <TextView
+        android:id="@+id/CourseScoreVariance"
+        android:layout_width="50dp"
+	    android:textSize="18sp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/CourseScoreAverage"
+    />
+
+</RelativeLayout>
