@@ -53,6 +53,7 @@ public class ScoreMark extends Activity implements OnRefreshListener {
 	private void GetScoreMark(Document doc) {
 		String[] ScoreMark = new String[11];
 		boolean FindScore = false;
+		String term = "";
 		
 		Elements tbl = doc.select("span[id]");
 		int i = 0;
@@ -69,8 +70,13 @@ public class ScoreMark extends Activity implements OnRefreshListener {
 				continue;
 			
 			// Skip the case like "2013学年第二学期", and keep the case like "2014学年第一学期二年级数学期中练习"
-			if (s.indexOf("学年第") != -1 && s.indexOf("年级") == -1)
+			if (s.indexOf("学年第") != -1 && s.indexOf("年级") == -1) {
+				if (s.indexOf("第一") != -1)
+					term="上";
+				else if (s.indexOf("第二") != -1)
+					term="下";
 				continue;
+			}
 
 			ScoreMark[i] = s;
 			i++;
@@ -82,6 +88,11 @@ public class ScoreMark extends Activity implements OnRefreshListener {
 				Score[NumOfScore] = new String[11];
 
 				String m = ScoreMark[0];
+				if (m.indexOf("第一") != -1)
+					term="上";
+				else if (m.indexOf("第二") != -1)
+					term="下";
+
 				if (m.indexOf("数学") != -1) 
 					Score[NumOfScore][0] = "数学";
 				else if (m.indexOf("语文") != -1) 
@@ -101,6 +112,7 @@ public class ScoreMark extends Activity implements OnRefreshListener {
 					Score[NumOfScore][1] = "五年";
 				else if (m.indexOf("六年级") != -1) 
 					Score[NumOfScore][1] = "六年";
+				Score[NumOfScore][1] = Score[NumOfScore][1] + term;
 				
 				Score[NumOfScore][2] = ScoreMark[1].substring(0, 2);
 				Score[NumOfScore][3] = ScoreMark[2];
