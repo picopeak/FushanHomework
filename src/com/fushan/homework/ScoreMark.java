@@ -26,14 +26,21 @@ import com.fushan.homework.DisplayMessageActivity.GetHomeworkTask;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -48,7 +55,7 @@ public class ScoreMark extends Activity implements OnRefreshListener {
 	private String[][] Score = new String[72][];
 	private int NumOfScore = 0;
 	private SwipeRefreshLayout swipeLayout;
-	AsyncTask<Context, Integer, Long> task = null;
+    private int score_sort = 1;
 
 	private void GetScoreMark(Document doc) {
 		String[] ScoreMark = new String[11];
@@ -188,11 +195,68 @@ public class ScoreMark extends Activity implements OnRefreshListener {
 		GetScoreItem("3");
 	}	
 
+	private void ShowScoreMark(Context c) {
+		List<HashMap<String,Object>> data;
+		HashMap<String,Object> map;
+		SimpleAdapter adapter;
+
+		data = new ArrayList<HashMap<String,Object>>();  
+        map = new HashMap<String,Object>();  
+        map.put("CourseName", "课程"); 
+        map.put("CourseGrade", "年级");  
+        map.put("CourseTerm", "学期"); 
+        map.put("CourseScore", "成绩");
+        map.put("CourseScoreTop", "最高");
+        map.put("CourseScoreAverage", "平均");
+        map.put("CourseScoreVariance", "方差");
+        data.add(map);
+
+        String courses[] = {"语文", "数学", "英语"};
+        String grades[] = {"六年下", "六年上", "五年下", "五年上", "四年下", "四年上", "三年下", "三年上", "二年下", "二年上", "一年下", "一年上"};
+        
+        if (Score != null) {
+        	if (score_sort == 1) {
+				for (int i=0; i<NumOfScore; i++) {
+			        map = new HashMap<String,Object>();  
+			        map.put("CourseName", Score[i][0]); 
+			        map.put("CourseGrade", Score[i][1]);  
+			        map.put("CourseTerm", Score[i][2]);  
+			        map.put("CourseScore", Score[i][3]);  
+			        map.put("CourseScoreTop", Score[i][4]);  
+			        map.put("CourseScoreAverage", Score[i][5]);  
+			        map.put("CourseScoreVariance", Score[i][6]);  
+			        data.add(map);
+				}        		
+        	} else {
+        		for (int j=0; j<grades.length; j++) {
+        			String g = grades[j];
+					for (int i=0; i<NumOfScore; i++) {
+						String gr = Score[i][1]; 
+						if (!g.equals(gr))
+							continue;
+				        map = new HashMap<String,Object>();  
+				        map.put("CourseName", Score[i][0]); 
+				        map.put("CourseGrade", Score[i][1]);  
+				        map.put("CourseTerm", Score[i][2]);  
+				        map.put("CourseScore", Score[i][3]);  
+				        map.put("CourseScoreTop", Score[i][4]);  
+				        map.put("CourseScoreAverage", Score[i][5]);  
+				        map.put("CourseScoreVariance", Score[i][6]);  
+				        data.add(map);
+					}        		
+        		}
+        	}
+		}
+
+		adapter = new SimpleAdapter(c, data, R.layout.scoremark,
+        		new String[] {"CourseName","CourseGrade","CourseTerm","CourseScore","CourseScoreTop","CourseScoreAverage","CourseScoreVariance"},
+        		new int[] {R.id.CourseName, R.id.CourseGrade, R.id.CourseTerm, R.id.CourseScore,R.id.CourseScoreTop,R.id.CourseScoreAverage,R.id.CourseScoreVariance});
+        
+        listview.setAdapter(adapter);  
+    	swipeLayout.setRefreshing(false);		
+	}
 	private class GetScoreTask extends AsyncTask<Context, Integer, Long> {
 		private Context c = null;
-		private List<HashMap<String,Object>> data;
-		private HashMap<String,Object> map;
-		private SimpleAdapter adapter;
 		
 		@Override
 		protected Long doInBackground(Context... params) {
@@ -207,37 +271,7 @@ public class ScoreMark extends Activity implements OnRefreshListener {
 		}
 
 		protected void onPostExecute(Long result) {
-	        data = new ArrayList<HashMap<String,Object>>();  
-	        map = new HashMap<String,Object>();  
-	        map.put("CourseName", "课程"); 
-	        map.put("CourseGrade", "年级");  
-	        map.put("CourseTerm", "学期"); 
-	        map.put("CourseScore", "成绩");
-	        map.put("CourseScoreTop", "最高");
-	        map.put("CourseScoreAverage", "平均");
-	        map.put("CourseScoreVariance", "方差");
-	        data.add(map);
-
-	        if (Score != null) {
-				for (int i=0; i<NumOfScore; i++) {
-			        map = new HashMap<String,Object>();  
-			        map.put("CourseName", Score[i][0]); 
-			        map.put("CourseGrade", Score[i][1]);  
-			        map.put("CourseTerm", Score[i][2]);  
-			        map.put("CourseScore", Score[i][3]);  
-			        map.put("CourseScoreTop", Score[i][4]);  
-			        map.put("CourseScoreAverage", Score[i][5]);  
-			        map.put("CourseScoreVariance", Score[i][6]);  
-			        data.add(map);
-				}
-			}
-
-			adapter = new SimpleAdapter(c, data, R.layout.scoremark,
-	        		new String[] {"CourseName","CourseGrade","CourseTerm","CourseScore","CourseScoreTop","CourseScoreAverage","CourseScoreVariance"},
-	        		new int[] {R.id.CourseName, R.id.CourseGrade, R.id.CourseTerm, R.id.CourseScore,R.id.CourseScoreTop,R.id.CourseScoreAverage,R.id.CourseScoreVariance});
-	        
-	        listview.setAdapter(adapter);  
-	    	swipeLayout.setRefreshing(false);
+			ShowScoreMark(c);
 		}
 
 	}
@@ -259,7 +293,7 @@ public class ScoreMark extends Activity implements OnRefreshListener {
         swipeLayout.setColorScheme(android.R.color.holo_red_light, android.R.color.holo_green_light, android.R.color.holo_blue_bright, android.R.color.holo_orange_light);  
     	swipeLayout.setRefreshing(true);
 		
-        task = new GetScoreTask().execute(this);
+    	AsyncTask<Context, Integer, Long> task = new GetScoreTask().execute(this);
 	}
 
 	@Override
@@ -267,4 +301,61 @@ public class ScoreMark extends Activity implements OnRefreshListener {
     	swipeLayout.setRefreshing(false);
 	}
 
+	public boolean onPrepareOptionsMenu(Menu menu)
+	{
+        String mark1, mark2;
+
+        SharedPreferences preference = getSharedPreferences("person", Context.MODE_PRIVATE);
+        score_sort = preference.getInt("score_sort", 1);
+        mark1 = (score_sort == 1) ? "*" : "";
+        mark2 = (score_sort == 2) ? "*" : "";
+        	
+        menu.clear();
+        menu.add(Menu.NONE, R.id.course, Menu.NONE, "按课程排序 "+mark1);
+		menu.add(Menu.NONE, R.id.grade, Menu.NONE, "按年级排序 "+mark2);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			// This ID represents the Home or Up button. In the case of this
+			// activity, the Up button is shown. Use NavUtils to allow users
+			// to navigate up one level in the application structure. For
+			// more details, see the Navigation pattern on Android Design:
+			//
+			// http://developer.android.com/design/patterns/navigation.html#up-vs-back
+			//
+			NavUtils.navigateUpFromSameTask(this);
+			return true;
+		case R.id.course: {
+	        if (score_sort == 1)
+	        	return true;
+
+	        score_sort = 1;
+			SharedPreferences preference = getSharedPreferences("person", Context.MODE_PRIVATE);
+			Editor edit = preference.edit();
+			edit.putInt("score_sort", score_sort);
+			edit.commit();
+			
+			ShowScoreMark(this);
+            return true;
+		}
+		case R.id.grade: {
+	        if (score_sort == 2)
+	        	return true;
+	        
+	        score_sort = 2;
+			SharedPreferences preference = getSharedPreferences("person", Context.MODE_PRIVATE);
+			Editor edit = preference.edit();
+			edit.putInt("score_sort", score_sort);
+			edit.commit();
+
+			ShowScoreMark(this);
+			return true;
+		}
+		}
+		return super.onOptionsItemSelected(item);
+	}	
 }
