@@ -182,14 +182,6 @@ public class ScoreMark extends Activity implements OnRefreshListener {
 	}
 	
 	private void GetScore() throws ParseException {
-
-		// check login state
-		if (!DisplayMessageActivity.login) {
-			Toast SM = Toast.makeText(this, "尚未登陆...", Toast.LENGTH_SHORT);
-			SM.show();
-			return;
-		}
-
 		GetScoreItem("1");
 		GetScoreItem("2");
 		GetScoreItem("3");
@@ -213,6 +205,7 @@ public class ScoreMark extends Activity implements OnRefreshListener {
 
         String courses[] = {"语文", "数学", "英语"};
         String grades[] = {"六年下", "六年上", "五年下", "五年上", "四年下", "四年上", "三年下", "三年上", "二年下", "二年上", "一年下", "一年上"};
+        String terms[] = {"期末", "期中"};
         
         if (Score != null) {
         	if (score_sort == 1) {
@@ -230,20 +223,24 @@ public class ScoreMark extends Activity implements OnRefreshListener {
         	} else {
         		for (int j=0; j<grades.length; j++) {
         			String g = grades[j];
-					for (int i=0; i<NumOfScore; i++) {
-						String gr = Score[i][1]; 
-						if (!g.equals(gr))
-							continue;
-				        map = new HashMap<String,Object>();  
-				        map.put("CourseName", Score[i][0]); 
-				        map.put("CourseGrade", Score[i][1]);  
-				        map.put("CourseTerm", Score[i][2]);  
-				        map.put("CourseScore", Score[i][3]);  
-				        map.put("CourseScoreTop", Score[i][4]);  
-				        map.put("CourseScoreAverage", Score[i][5]);  
-				        map.put("CourseScoreVariance", Score[i][6]);  
-				        data.add(map);
-					}        		
+            		for (int k=0; k<terms.length; k++) {
+            			String t = terms[k];
+						for (int i=0; i<NumOfScore; i++) {
+							String gr = Score[i][1]; 
+							String te = Score[i][2]; 
+							if (!g.equals(gr) || !t.equals(te))
+								continue;
+					        map = new HashMap<String,Object>();  
+					        map.put("CourseName", Score[i][0]); 
+					        map.put("CourseGrade", Score[i][1]);  
+					        map.put("CourseTerm", Score[i][2]);  
+					        map.put("CourseScore", Score[i][3]);  
+					        map.put("CourseScoreTop", Score[i][4]);  
+					        map.put("CourseScoreAverage", Score[i][5]);  
+					        map.put("CourseScoreVariance", Score[i][6]);  
+					        data.add(map);
+						}
+            		}
         		}
         	}
 		}

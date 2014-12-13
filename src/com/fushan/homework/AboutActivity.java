@@ -29,7 +29,7 @@ public class AboutActivity extends Activity {
         AboutString += "3. 可以使用菜单快速切换两个用户。<BR><BR><BR>";
         AboutString += "<h3>福外作业更新介绍:</h3>";
         AboutString += "v4.3:<BR><BR>";
-        AboutString += "1. 增加查询成绩功能。<BR><BR>";
+        AboutString += "1. 增加查询成绩功能。若不能看到全部成绩数据，请旋转屏幕。<BR><BR>";
         AboutString += "v4.2:<BR><BR>";
         AboutString += "1. 修复一个由福山教育网络服务器端的bug导致作业访问异常。如果在家校桥作业的同一日期上连续访问两次，第二次取到的作业是空白，因此导致连续下拉刷新<福外作业>时，显示今日没有作业!<BR>";
         AboutString += "2. 修复一个彩虹刷新条永久显示的问题!<BR><BR>";
