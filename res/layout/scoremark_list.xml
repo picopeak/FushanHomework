@@ -5,11 +5,93 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
+	<RelativeLayout
+	    android:id="@+id/ScoreMarkTitle"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content" >
+
+	    <TextView
+	        android:id="@+id/CourseNameTitile"
+	        android:layout_width="40dp"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentLeft="true"
+	        android:layout_alignParentTop="true"
+	        android:gravity="center"
+	        android:text="课程"
+	        android:textSize="18sp" />
+	
+	    <TextView
+	        android:id="@+id/CourseGradeTitile"
+	        android:layout_width="60dp"
+		    android:textSize="18sp"
+	        android:layout_height="wrap_content"
+	        android:gravity="center"
+	        android:layout_alignParentTop="true"
+	        android:text="年级"
+	        android:layout_toRightOf="@+id/CourseNameTitile"
+		/>
+	    
+	    <TextView
+	        android:id="@+id/CourseTermTitile"
+	        android:layout_width="40dp"
+		    android:textSize="18sp"
+	        android:layout_height="wrap_content"
+	        android:gravity="center"
+	        android:layout_alignParentTop="true"
+	        android:text="学期"
+	        android:layout_toRightOf="@+id/CourseGradeTitile"
+		/>
+	    
+	    <TextView
+	        android:id="@+id/CourseScoreTitile"
+	        android:layout_width="50dp"
+		    android:textSize="18sp"
+	        android:layout_height="wrap_content"
+	        android:gravity="center"
+	        android:layout_alignParentTop="true"
+	        android:text="成绩"
+	        android:layout_toRightOf="@+id/CourseTermTitile"
+		/>
+	    
+	    <TextView
+	        android:id="@+id/CourseScoreTopTitile"
+	        android:layout_width="50dp"
+		    android:textSize="18sp"
+	        android:layout_height="wrap_content"
+	        android:gravity="center"
+	        android:layout_alignParentTop="true"
+	        android:text="最高"
+	        android:layout_toRightOf="@+id/CourseScoreTitile"
+		/>
+	
+	    <TextView
+	        android:id="@+id/CourseScoreAverageTitile"
+	        android:layout_width="60dp"
+		    android:textSize="18sp"
+	        android:layout_height="wrap_content"
+	        android:gravity="center"
+	        android:layout_alignParentTop="true"
+	        android:text="平均"
+	        android:layout_toRightOf="@+id/CourseScoreTopTitile"
+		/>
+	    
+	    <TextView
+	        android:id="@+id/CourseScoreVarianceTitile"
+	        android:layout_width="50dp"
+		    android:textSize="18sp"
+	        android:layout_height="wrap_content"
+	        android:gravity="center"
+	        android:layout_alignParentTop="true"
+	        android:text="方差"
+	        android:layout_toRightOf="@+id/CourseScoreAverageTitile"
+	    />
+    </RelativeLayout>
+
     <android.support.v4.widget.SwipeRefreshLayout  
     	android:id="@+id/score_swipe_refresh"  
     	android:layout_width="match_parent"  
     	android:layout_height="match_parent" >  
-    	<ListView
+       	<ListView
 		    android:layout_width="match_parent"
 		    android:layout_height="match_parent" 
 		    android:id="@+id/ScoreMark"

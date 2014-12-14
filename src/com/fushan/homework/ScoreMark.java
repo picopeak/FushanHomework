@@ -15,7 +15,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 import org.jsoup.Jsoup;
@@ -23,11 +22,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import com.fushan.homework.DisplayMessageActivity.GetHomeworkTask;
-
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Color;
@@ -36,21 +32,15 @@ import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
-import android.text.Html;
-import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class ScoreMark extends Activity implements OnRefreshListener {
 
@@ -264,16 +254,6 @@ public class ScoreMark extends Activity implements OnRefreshListener {
 		SimpleAdapter adapter;
 
 		data = new ArrayList<HashMap<String,Object>>();  
-        map = new HashMap<String,Object>();  
-        map.put("CourseName", "课程"); 
-        map.put("CourseGrade", "年级");  
-        map.put("CourseTerm", "学期"); 
-        map.put("CourseScore", "成绩");
-        map.put("CourseScoreTop", "最高");
-        map.put("CourseScoreAverage", "平均");
-        map.put("CourseScoreVariance", "方差");
-        data.add(map);
-
         if (Score != null) {
         	if (score_sort == 1) {
 				for (int i=0; i<NumOfScore; i++) {
@@ -346,6 +326,29 @@ public class ScoreMark extends Activity implements OnRefreshListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.scoremark_list);	
+
+		TextView v;
+		v = (TextView) findViewById(R.id.CourseNameTitile);
+		v.setTextColor(Color.WHITE);
+		v.setBackgroundColor(Color.parseColor("#9D61AB"));
+		v = (TextView) findViewById(R.id.CourseGradeTitile);
+		v.setTextColor(Color.WHITE);
+		v.setBackgroundColor(Color.parseColor("#9D61AB"));
+		v = (TextView) findViewById(R.id.CourseTermTitile);
+		v.setTextColor(Color.WHITE);
+		v.setBackgroundColor(Color.parseColor("#9D61AB"));
+		v = (TextView) findViewById(R.id.CourseScoreTitile);
+		v.setTextColor(Color.WHITE);
+		v.setBackgroundColor(Color.parseColor("#9D61AB"));
+		v = (TextView) findViewById(R.id.CourseScoreTopTitile);
+		v.setTextColor(Color.WHITE);
+		v.setBackgroundColor(Color.parseColor("#9D61AB"));
+		v = (TextView) findViewById(R.id.CourseScoreAverageTitile);
+		v.setTextColor(Color.WHITE);
+		v.setBackgroundColor(Color.parseColor("#9D61AB"));
+		v = (TextView) findViewById(R.id.CourseScoreVarianceTitile);
+		v.setTextColor(Color.WHITE);
+		v.setBackgroundColor(Color.parseColor("#9D61AB"));
 
 		LinearLayout bg = (LinearLayout) findViewById(R.id.ScoreMarkList);
 		bg.setBackgroundColor(Color.parseColor("#F5F5DC"));
