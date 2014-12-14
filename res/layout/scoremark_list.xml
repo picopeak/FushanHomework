@@ -12,7 +12,7 @@
 
 	    <TextView
 	        android:id="@+id/CourseNameTitile"
-	        android:layout_width="40dp"
+	        android:layout_width="45dp"
 	        android:layout_height="wrap_content"
 	        android:layout_alignParentLeft="true"
 	        android:layout_alignParentTop="true"
@@ -33,7 +33,7 @@
 	    
 	    <TextView
 	        android:id="@+id/CourseTermTitile"
-	        android:layout_width="40dp"
+	        android:layout_width="45dp"
 		    android:textSize="18sp"
 	        android:layout_height="wrap_content"
 	        android:gravity="center"
