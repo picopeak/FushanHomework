@@ -8,6 +8,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -35,11 +36,14 @@ import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -56,7 +60,74 @@ public class ScoreMark extends Activity implements OnRefreshListener {
 	private int NumOfScore = 0;
 	private SwipeRefreshLayout swipeLayout;
     private int score_sort = 1;
+    private AsyncTask<Context, Integer, Long> task = null;
+    private String courses[] = {"语文", "数学", "英语"};
+    private String grades[] = {"六年下", "六年上", "五年下", "五年上", "四年下", "四年上", "三年下", "三年上", "二年下", "二年上", "一年下", "一年上"};
+    private String terms[] = {"期末", "期中"};
 
+    private class ChangeBGAdapater extends SimpleAdapter {
+
+		private LayoutInflater mInflater = null;
+
+		public ChangeBGAdapater(Context context,
+				List<? extends Map<String, ?>> data, int resource,
+				String[] from, int[] to) {
+			super(context, data, resource, from, to);
+			// TODO Auto-generated constructor stub
+		}
+    	
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+		     convertView = super.getView(position, convertView, parent);
+		     
+		     TextView v = null;
+		     int c;
+		     if (score_sort == 1) {
+		    	 v = (TextView) convertView.findViewById(R.id.CourseName);
+		    	 String t = (String) v.getText();
+		    	 int i = 0;
+		    	 for (i=0; i<courses.length; i++) {
+		    		 if (t.equals(courses[i])) {
+		    			 break;
+		    		 }
+		    	 }
+		    	 int color = i % 2;
+		    	 c = (color == 0) ? Color.TRANSPARENT : Color.LTGRAY;
+			     v.setBackgroundColor(c);
+
+			     v = (TextView) convertView.findViewById(R.id.CourseGrade);
+		    	 v.setBackgroundColor(c);
+		     } else {
+		    	 v = (TextView) convertView.findViewById(R.id.CourseGrade);
+		    	 String t = (String) v.getText();
+		    	 int i = 0;
+		    	 for (i=0; i<grades.length; i++) {
+		    		 if (t.equals(grades[i])) {
+		    			 break;
+		    		 }
+		    	 }
+		    	 int color = i % 2;
+		    	 c = (color == 0) ? Color.TRANSPARENT : Color.LTGRAY;
+			     v.setBackgroundColor(c);
+
+			     v = (TextView) convertView.findViewById(R.id.CourseName);
+		    	 v.setBackgroundColor(c);
+		     }
+	    	 v = (TextView) convertView.findViewById(R.id.CourseTerm);
+	    	 v.setBackgroundColor(c);
+	    	 v = (TextView) convertView.findViewById(R.id.CourseScore);
+	    	 v.setBackgroundColor(c);
+	    	 v = (TextView) convertView.findViewById(R.id.CourseScoreTop);
+	    	 v.setBackgroundColor(c);
+	    	 v = (TextView) convertView.findViewById(R.id.CourseScoreAverage);
+	    	 v.setBackgroundColor(c);
+	    	 v = (TextView) convertView.findViewById(R.id.CourseScoreVariance);
+	    	 v.setBackgroundColor(c);
+		     
+		     return convertView;
+		}
+    }
+    
 	private void GetScoreMark(Document doc) {
 		String[] ScoreMark = new String[11];
 		boolean FindScore = false;
@@ -203,10 +274,6 @@ public class ScoreMark extends Activity implements OnRefreshListener {
         map.put("CourseScoreVariance", "方差");
         data.add(map);
 
-        String courses[] = {"语文", "数学", "英语"};
-        String grades[] = {"六年下", "六年上", "五年下", "五年上", "四年下", "四年上", "三年下", "三年上", "二年下", "二年上", "一年下", "一年上"};
-        String terms[] = {"期末", "期中"};
-        
         if (Score != null) {
         	if (score_sort == 1) {
 				for (int i=0; i<NumOfScore; i++) {
@@ -245,13 +312,14 @@ public class ScoreMark extends Activity implements OnRefreshListener {
         	}
 		}
 
-		adapter = new SimpleAdapter(c, data, R.layout.scoremark,
+		adapter = new ChangeBGAdapater(c, data, R.layout.scoremark,
         		new String[] {"CourseName","CourseGrade","CourseTerm","CourseScore","CourseScoreTop","CourseScoreAverage","CourseScoreVariance"},
         		new int[] {R.id.CourseName, R.id.CourseGrade, R.id.CourseTerm, R.id.CourseScore,R.id.CourseScoreTop,R.id.CourseScoreAverage,R.id.CourseScoreVariance});
         
         listview.setAdapter(adapter);  
     	swipeLayout.setRefreshing(false);		
 	}
+
 	private class GetScoreTask extends AsyncTask<Context, Integer, Long> {
 		private Context c = null;
 		
@@ -290,12 +358,16 @@ public class ScoreMark extends Activity implements OnRefreshListener {
         swipeLayout.setColorScheme(android.R.color.holo_red_light, android.R.color.holo_green_light, android.R.color.holo_blue_bright, android.R.color.holo_orange_light);  
     	swipeLayout.setRefreshing(true);
 		
-    	AsyncTask<Context, Integer, Long> task = new GetScoreTask().execute(this);
+    	task = new GetScoreTask().execute(this);
 	}
 
 	@Override
 	public void onRefresh() {
-    	swipeLayout.setRefreshing(false);
+		if (task != null && task.getStatus()==AsyncTask.Status.RUNNING) {
+			return;
+		}
+
+		swipeLayout.setRefreshing(false);
 	}
 
 	public boolean onPrepareOptionsMenu(Menu menu)
