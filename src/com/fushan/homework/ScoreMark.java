@@ -24,6 +24,7 @@ import org.jsoup.select.Elements;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Color;
@@ -41,6 +42,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class ScoreMark extends Activity implements OnRefreshListener {
 
@@ -54,11 +56,11 @@ public class ScoreMark extends Activity implements OnRefreshListener {
     private String courses[] = {"语文", "数学", "英语"};
     private String grades[] = {"六年下", "六年上", "五年下", "五年上", "四年下", "四年上", "三年下", "三年上", "二年下", "二年上", "一年下", "一年上"};
     private String terms[] = {"期末", "期中"};
+	private String CurrentUser;
+	private boolean FirstScoreUpdate;
+	private boolean online;
 
     private class ChangeBGAdapater extends SimpleAdapter {
-
-		private LayoutInflater mInflater = null;
-
 		public ChangeBGAdapater(Context context,
 				List<? extends Map<String, ?>> data, int resource,
 				String[] from, int[] to) {
@@ -192,6 +194,7 @@ public class ScoreMark extends Activity implements OnRefreshListener {
 				NumOfScore++;
 			}
 		}
+		
 	}
 	
 	private void ReadScore(HttpResponse httpResponse) {
@@ -213,7 +216,7 @@ public class ScoreMark extends Activity implements OnRefreshListener {
 		}
 	}
 
-	private void GetScoreItem(String item) {
+	private boolean GetScoreItem(String item) {
 		try {
 /*
 			HttpResponse httpResponse = null;
@@ -234,24 +237,53 @@ public class ScoreMark extends Activity implements OnRefreshListener {
 			httpResponse = DisplayMessageActivity.httpclient.execute(httppost);
 			int SC = httpResponse.getStatusLine().getStatusCode();
 			if (SC == 200) {
+				if (!FirstScoreUpdate) {
+			        // Clean scores
+			        for (int i=0; i<Score.length; i++) {
+			        	Score[i] = null;
+			        }
+					NumOfScore = 0;
+				}
 				ReadScore(httpResponse);
+				FirstScoreUpdate = true;
+				httppost.abort();
+				return true;
 			}
-			httppost.abort();			
+			httppost.abort();
 		} catch (ClientProtocolException e) {
 		} catch (Exception e) {
 		}
+		
+		return false;
 	}
 	
-	private void GetScore() throws ParseException {
-		GetScoreItem("1");
-		GetScoreItem("2");
-		GetScoreItem("3");
+	private void GetScore(Context c) throws ParseException {
+		boolean Got1, Got2, Got3;
+		FirstScoreUpdate = false;
+		online = Got1 = Got2 = Got3 = false;
+		
+		if (!DisplayMessageActivity.login) {
+			return;
+		}
+		
+		Got1 = GetScoreItem("1");
+		Got2 = GetScoreItem("2");
+		Got3 = GetScoreItem("3");
+		
+		online = (Got1 && Got2 && Got3);
 	}	
 
 	private void ShowScoreMark(Context c) {
 		List<HashMap<String,Object>> data;
 		HashMap<String,Object> map;
 		SimpleAdapter adapter;
+
+		// Rest the number of scores
+		NumOfScore = 0;
+		for (int i=0; i<Score.length; i++) {
+			if (Score[i] != null)
+				NumOfScore++;
+		}
 
 		data = new ArrayList<HashMap<String,Object>>();  
         if (Score != null) {
@@ -297,7 +329,6 @@ public class ScoreMark extends Activity implements OnRefreshListener {
         		new int[] {R.id.CourseName, R.id.CourseGrade, R.id.CourseTerm, R.id.CourseScore,R.id.CourseScoreTop,R.id.CourseScoreAverage,R.id.CourseScoreVariance});
         
         listview.setAdapter(adapter);  
-    	swipeLayout.setRefreshing(false);		
 	}
 
 	private class GetScoreTask extends AsyncTask<Context, Integer, Long> {
@@ -307,7 +338,9 @@ public class ScoreMark extends Activity implements OnRefreshListener {
 		protected Long doInBackground(Context... params) {
 			try {
 				c = params[0];
-				GetScore();
+				GetScore(c);
+				if (online)
+					DisplayMessageActivity.HWDB.createSMRecords(CurrentUser, Score);
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -316,7 +349,9 @@ public class ScoreMark extends Activity implements OnRefreshListener {
 		}
 
 		protected void onPostExecute(Long result) {
-			ShowScoreMark(c);
+	    	swipeLayout.setRefreshing(false);		
+			if (online)
+				ShowScoreMark(c);
 		}
 
 	}
@@ -360,7 +395,18 @@ public class ScoreMark extends Activity implements OnRefreshListener {
         swipeLayout.setOnRefreshListener(this);
         swipeLayout.setColorScheme(android.R.color.holo_red_light, android.R.color.holo_green_light, android.R.color.holo_blue_bright, android.R.color.holo_orange_light);  
     	swipeLayout.setRefreshing(true);
-		
+
+        Intent mIntent = getIntent();  
+        Bundle b = mIntent.getExtras(); 
+        CurrentUser = b.getString("CurrentUser");
+        
+        SharedPreferences preference = getSharedPreferences("person", Context.MODE_PRIVATE);
+        score_sort = preference.getInt("score_sort", 1);
+
+        // show offline data
+        Score = HomeworkDatabase.getSMRecords(CurrentUser);
+        ShowScoreMark(this);
+
     	task = new GetScoreTask().execute(this);
 	}
 

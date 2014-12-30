@@ -28,6 +28,8 @@ public class AboutActivity extends Activity {
         AboutString += "2. 下拉可以刷新当前日期作业内容。<BR>";       
         AboutString += "3. 可以使用菜单快速切换两个用户。<BR><BR><BR>";
         AboutString += "<h3>福外作业更新介绍:</h3>";
+        AboutString += "v4.4:<BR><BR>";
+        AboutString += "1. 改善成绩显示用户体验，允许离线访问成绩。<BR><BR>";
         AboutString += "v4.3:<BR><BR>";
         AboutString += "1. 增加查询成绩功能。若不能看到全部成绩数据，请旋转屏幕。另外，可以在菜单中选择成绩按照课程和年级两种不同方式排序。<BR><BR>";
         AboutString += "v4.2:<BR><BR>";

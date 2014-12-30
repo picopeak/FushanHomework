@@ -74,6 +74,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -98,7 +99,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 	// The date to display homework
 	private Calendar c;
 	private Date LastTodayUpdate;
-	private HomeworkDatabase HWDB;
+	public static HomeworkDatabase HWDB;
 	private boolean FirstLaunch;
 	private String LastDate;
 	
@@ -244,7 +245,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 			if (arg1 == 1) {
 				// Fetch from database first
 				String HW[];
-				HW = HWDB.getRecords(UserName, getDate(c));
+				HW = HWDB.getHWRecords(UserName, getDate(c));
 				if (HW[0] == null) {
 					String TEMP_HW[] = new String[10];
 					TEMP_HW[0] = "正在读取数据...";
@@ -308,11 +309,11 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 				t.add(Calendar.DATE, 1);
 
 				// Fetch from database first
-				HW = HWDB.getRecords(UserName, getDate(y));
+				HW = HWDB.getHWRecords(UserName, getDate(y));
 				DisplayHomeWorkFromCache(HomeWorkL, HW);
-				HW = HWDB.getRecords(UserName, getDate(t));
+				HW = HWDB.getHWRecords(UserName, getDate(t));
 				DisplayHomeWorkFromCache(HomeWorkR, HW);
-				HW = HWDB.getRecords(UserName, getDate(c));
+				HW = HWDB.getHWRecords(UserName, getDate(c));
 				DisplayHomeWorkFromCache(HomeWork, HW);
 				
 				mPager.setCurrentItem(1, false);
@@ -323,11 +324,11 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 				t.add(Calendar.DATE, 1);
 
 				// Fetch from database first
-				HW = HWDB.getRecords(UserName, getDate(y));
+				HW = HWDB.getHWRecords(UserName, getDate(y));
 				DisplayHomeWorkFromCache(HomeWorkL, HW);
-				HW = HWDB.getRecords(UserName, getDate(t));
+				HW = HWDB.getHWRecords(UserName, getDate(t));
 				DisplayHomeWorkFromCache(HomeWorkR, HW);
-				HW = HWDB.getRecords(UserName, getDate(c));
+				HW = HWDB.getHWRecords(UserName, getDate(c));
 				DisplayHomeWorkFromCache(HomeWork, HW);
 				
 				mPager.setCurrentItem(1, false);
@@ -571,7 +572,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 
 				String HW[];
 				// Fetch from database first
-				HW = HWDB.getRecords(UserName, getDate(y));
+				HW = HWDB.getHWRecords(UserName, getDate(y));
 				if (HW[0] == null) {
 					String TEMP_HW[] = new String[10];
 					TEMP_HW[0] = "";
@@ -580,7 +581,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 					DisplayHomeWork(HW, HomeWorkL);
 				}
 
-				HW = HWDB.getRecords(UserName, getDate(t));
+				HW = HWDB.getHWRecords(UserName, getDate(t));
 				if (HW[0] == null) {
 					String TEMP_HW[] = new String[10];
 					TEMP_HW[0] = "";
@@ -669,7 +670,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 					
 					String d = getDate(c);
 					if (HasHomework || (!HasHomework && try_workaround_once) || once || !LastDate.equals(d)) {
-						HWDB.createRecords(UserName, d, HomeWork);
+						HWDB.createHWRecords(UserName, d, HomeWork);
 						LastDate = d;
 						return HomeWork;
 					} else {
@@ -739,7 +740,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 					
 					String d = getDate(c);
 					if (HasHomework || (!HasHomework && try_workaround_once) || FirstLaunch  || !LastDate.equals(d)) {
-						HWDB.createRecords(UserName, d, HomeWork);
+						HWDB.createHWRecords(UserName, d, HomeWork);
 						
 						// Update current time
 						LastTodayUpdate = Calendar.getInstance().getTime();
@@ -915,7 +916,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		String[] HW = new String[10];
 
 		// Fetch from database first
-		HW = HWDB.getRecords(UserName, getDate(c));
+		HW = HWDB.getHWRecords(UserName, getDate(c));
 		if (HW[0] != null) {
 			DisplayHomeWork(HW, HomeWork);
 		}
@@ -1272,7 +1273,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		setContentView(R.layout.activity_display_message);
 		RelativeLayout bg = (RelativeLayout) findViewById(R.id.DisplayHomework);
 		bg.setBackgroundColor(Color.parseColor("#F5F5DC"));
-
+		
 		// Create thread safe http client
 		BasicHttpParams params = new BasicHttpParams();
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
@@ -1412,8 +1413,14 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 			}
 		}
 		case R.id.Score: {
+			if (!login) {
+				Toast SM = Toast.makeText(DisplayMessageActivity.this, "登陆尚未完成，显示离线成绩...", Toast.LENGTH_SHORT);
+				SM.show();
+			}
+			
 			Intent intent = new Intent();
 			intent.setClass(DisplayMessageActivity.this, ScoreMark.class);
+			intent.putExtra("CurrentUser", UserName);
 			startActivity(intent);
 			return true;
 		}
@@ -1452,10 +1459,8 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		Mark2 = (ID == 2) ? " *" : "";
 
 		menu.clear();
-		menu.add(Menu.NONE, R.id.User1, Menu.NONE, UserName1 + "(" + RealName1
-				+ ")" + Mark1);
-		menu.add(Menu.NONE, R.id.User2, Menu.NONE, UserName2 + "(" + RealName2
-				+ ")" + Mark2);
+		menu.add(Menu.NONE, R.id.User1, Menu.NONE, UserName1 + "(" + RealName1 + ")" + Mark1);
+		menu.add(Menu.NONE, R.id.User2, Menu.NONE, UserName2 + "(" + RealName2 + ")" + Mark2);
 		menu.add(Menu.NONE, R.id.Score, Menu.NONE, "成绩");
 		menu.add(Menu.NONE, R.id.Fontsize, Menu.NONE, bigfont ? "小字体" : "大字体");
 		menu.add(Menu.NONE, R.id.About, Menu.NONE, "关于");
