@@ -527,6 +527,63 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 		return false;
 	}
 
+	private boolean Logout() {
+		// try to login 2 times;
+		try {
+			ViewState = GetOldViewState("http://www.fushanedu.cn/jxq/jxq_User.aspx");
+
+			HttpResponse httpResponse = null;
+			HttpPost httppost = new HttpPost(
+					"http://www.fushanedu.cn/jxq/jxq_User.aspx");
+			httppost.addHeader("Content-Type",
+					"application/x-www-form-urlencoded");
+
+			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+			// Only work for v2.0 and below
+			// nameValuePairs.add(new BasicNameValuePair("__VIEWSTATE",
+			// "dDwtMTIwMjU0ODg5NDs7bDxsb2dpbjpidG5sb2dpbjs+PrJFQt1nM63efREqb/0FcyQpPFwa"));
+
+			// This works for v3.0
+			// nameValuePairs.add(new BasicNameValuePair("__VIEWSTATE",
+			// "dDwtMTIwMjU0ODg5NDs7bDxsb2dpbjpidG5sb2dpbjs+PirAF7I2CPvB/hrCXAPxCiCha+tS"));
+
+			nameValuePairs.add(new BasicNameValuePair("__VIEWSTATE",
+					ViewState));
+
+			nameValuePairs.add(new BasicNameValuePair("login:btnlogout.x",
+					"35"));
+			nameValuePairs.add(new BasicNameValuePair("login:btnlogout.y",
+					"13"));
+			httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs,
+					"GB2312"));
+			httpResponse = httpclient.execute(httppost);
+			int SC = httpResponse.getStatusLine().getStatusCode();
+			if (SC == 200) {
+				HttpEntity entity = httpResponse.getEntity();
+				InputStream is = entity.getContent();
+
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(is, "GB2312"));
+				String line = "";
+				StringBuilder sb = new StringBuilder();
+				while ((line = reader.readLine()) != null) {
+					if (line.indexOf("用户名") != -1) {
+						httppost.abort();
+						return true;
+					}
+					sb.append(line);
+				}
+				httppost.abort();
+			}
+		} catch (ClientProtocolException e) {
+			// Log.e("DisplayMessageActivity", "E " + e.getMessage());
+		} catch (Exception e) {
+			// Log.e("DisplayMessageActivity", "E " + e.getMessage());
+		}
+
+		return false;
+	}
+
 	// Login facility
 	private class LoginTask extends AsyncTask<Calendar, Integer, Long> {
 		private Calendar c;
@@ -592,6 +649,25 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 
 				GetToDateHomeWorkTaskWithCache(c);
 			}
+		}
+	}
+
+	// Login facility
+	private class LogoutTask extends AsyncTask<Calendar, Integer, Long> {
+		private Calendar c;
+		
+		protected Long doInBackground(Calendar... parms) {
+			try {
+				c = parms[0];
+				Logout();
+			} catch (Exception pce) {
+				// Log.e("DisplayMessageActivity", "PCE " + pce.getMessage());
+			}
+			return (long) 1;
+		}
+
+		protected void onPostExecute(Long result) {
+			LastTask = new LoginTask().execute(c);
 		}
 	}
 
@@ -1384,14 +1460,14 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 			} else {
 				CancelLastTask();
 		    	swipeLayout.setRefreshing(true);
-				LastTask = new LoginTask().execute(c);
+				LastTask = new LogoutTask().execute(c);
 				return true;
 			}
 		}
 		case R.id.User2: {
 			SharedPreferences preference = getSharedPreferences("person",
 					Context.MODE_PRIVATE);
-			int ID = preference.getInt("CurrentUser", 1);
+			int ID = preference.getInt("CurrentUser", 2);
 			if (ID == 2)
 				return true;
 
@@ -1408,7 +1484,7 @@ public class DisplayMessageActivity extends Activity implements OnRefreshListene
 			} else {
 				CancelLastTask();
 		    	swipeLayout.setRefreshing(true);
-				LastTask = new LoginTask().execute(c);
+				LastTask = new LogoutTask().execute(c);
 				return true;
 			}
 		}
