@@ -23,6 +23,7 @@ public class AboutActivity extends Activity {
         Description.setMovementMethod(ScrollingMovementMethod.getInstance()); 
         Description.setMovementMethod(LinkMovementMethod.getInstance());
         String AboutString = "";
+        AboutString += "<h3>http://www.zuoyazuo.com</h3><BR>";
         AboutString += "<h3>福外作业使用指南:</h3>";
         AboutString += "1. 左右滑动可以切换日期。<BR>";       
         AboutString += "2. 下拉可以刷新当前日期作业内容。<BR>";       
