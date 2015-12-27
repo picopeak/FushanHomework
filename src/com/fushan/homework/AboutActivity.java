@@ -23,7 +23,7 @@ public class AboutActivity extends Activity {
         Description.setMovementMethod(ScrollingMovementMethod.getInstance()); 
         Description.setMovementMethod(LinkMovementMethod.getInstance());
         String AboutString = "";
-        AboutString += "<h3>http://www.zuoyazuo.com</h3><BR>";
+        AboutString += "<center>( <a href=\"http://www.zuoyazuo.com\">zuoyazuo.com</a> Copyright © 2015 )</center><BR>";
         AboutString += "<h3>福外作业使用指南:</h3>";
         AboutString += "1. 左右滑动可以切换日期。<BR>";       
         AboutString += "2. 下拉可以刷新当前日期作业内容。<BR>";       
@@ -64,7 +64,7 @@ public class AboutActivity extends Activity {
         AboutString += "3. 修复一些简单的错误，提高性能。<BR><BR>";
         AboutString += "v1.0:<BR><BR>";
         AboutString += "1. 初始版本。<BR><BR>";
-        AboutString += "如有意见或建议，请发电子邮件至<a href=\"mailto:liujiangning@gmail.com\">liujiangning@gmail.com</a>。<BR>";
+        AboutString += "如有意见或建议，请发电子邮件至<a href=\"mailto:picopeak@163.com\">picopeak@163.com</a>。<BR>";
         Description.setText(Html.fromHtml(AboutString, null, null));
     }
 
